@@ -1,5 +1,4 @@
-# FragGeneScan
-FragGeneScan-Plus for scalable high-throughput short-read open reading frame prediction
+#FragGeneScan-Plus for scalable high-throughput short-read open reading frame prediction
 
 Dongjae Kim , Aria S. Hahn , Shang-Ju Wu , Niels W. Hanson , Kishori M. Konwar , and Steven J. Hallam 
 
