@@ -52,7 +52,7 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
        if( O[i]=='c' ) O[i]='C';
        if( O[i]=='g' ) O[i]='G';
     }
-    printf("%s\n",O);
+    //printf("%s\n",O);
 
     if (whole_genome==1){
         gene_len = 120;
@@ -115,8 +115,8 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
             alpha[S_STATE_1][2] = alpha[S_STATE_1][2] - LOG_30;
         }
     }
-    printf("---nextexts\n",O);
 
+    int multiple=0;
     /******************************************************************/
     /*  fill out the rest of the columns                              */
     /******************************************************************/
@@ -871,10 +871,9 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
             //!! Transfer all of the output buffer writing code to another function. Modularize this.
 
             if (dna_id > gene_len) {
-
                 print_outputs(codon_start, start_t, end_t, frame, output_buffer, aa_buffer, dna_buffer, sequence_head, 
-                        dna, dna1, dna_f, dna_f1, protein, insert, c_delete, insert_id, delete_id, format, temp_str_ptr);
-
+                        dna, dna1, dna_f, dna_f1, protein, insert, c_delete, insert_id, delete_id, format, temp_str_ptr,multiple);
+                multiple++;
             }
 
             codon_start = 0;
@@ -1160,9 +1159,13 @@ void get_train_from_file(char *filename, HMM *hmm_ptr, char *mfilename,
 
 void print_outputs(int codon_start, int start_t, int end_t, int frame, char* output_buffer, char* aa_buffer, char* dna_buffer, 
         char* sequence_head_short, char* dna, char* dna1, char* dna_f, char* dna_f1, char* protein,
-        int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr) {
+        int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple) {
 
     int i;
+    char tab[] = "\t";
+
+
+    
 
     if (codon_start == 1) {
 
@@ -1190,7 +1193,11 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
         strcat(output_buffer, temp_str_ptr);
 
         sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
+        
+        if(multiple)  strcat(aa_buffer, tab);
+
         strcat(aa_buffer, temp_str_ptr);
+
         sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
         strcat(dna_buffer, temp_str_ptr);
 
@@ -1205,7 +1212,6 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
         strcat(dna_buffer, temp_str_ptr);
 
     } else if (codon_start == -1) {
-
         //sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t%lf\t", start_t, end_t, frame, final_score);
         sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t", start_t, end_t, frame);
         strcat(output_buffer, temp_str_ptr);
@@ -1229,6 +1235,39 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
         strcat(output_buffer, temp_str_ptr);
 
         sprintf(temp_str_ptr, "%s_%d_%d_-\n", sequence_head_short, start_t, end_t);
+
+        if(multiple)  strcat(aa_buffer, tab);
+        strcat(aa_buffer, temp_str_ptr);
+
+
+        sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
+        strcat(dna_buffer, temp_str_ptr);
+
+        get_protein(dna,protein,1);
+        sprintf(temp_str_ptr, "%s\n", protein);
+        strcat(aa_buffer, temp_str_ptr);
+        if (format == 0){
+            sprintf(temp_str_ptr, "%s\n", dna);
+        }else if (format == 1){
+            sprintf(temp_str_ptr, "%s\n", dna_f);
+        }
+        strcat(dna_buffer, temp_str_ptr);
+
+    } 
+    else if (codon_start == -1) {
+
+        //sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t%lf\t", start_t, end_t, frame, final_score);
+        sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t", start_t, end_t, frame);
+        strcat(output_buffer, temp_str_ptr);
+        sprintf(temp_str_ptr, "I:");
+        strcat(output_buffer, temp_str_ptr);
+
+        for (i = 0; i < insert_id; i++){
+            sprintf(temp_str_ptr, "%d,", insert[i]);
+            strcat(output_buffer, temp_str_ptr);
+        }
+
+        sprintf(temp_str_ptr, "\tD:");
         strcat(aa_buffer, temp_str_ptr);
         sprintf(temp_str_ptr, "%s_%d_%d_-\n", sequence_head_short, start_t, end_t);
         strcat(dna_buffer, temp_str_ptr);
@@ -1237,6 +1276,7 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
         get_rc_dna(dna, dna1);
         get_rc_dna_indel(dna_f, dna_f1);
         sprintf(temp_str_ptr, "%s\n", protein);
+        if(multiple)  strcat(aa_buffer, tab);
         strcat(aa_buffer, temp_str_ptr);
 
         if (format == 0) {

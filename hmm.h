@@ -225,6 +225,6 @@ void print_usage();
 void free_thread_data(thread_data* td);
 void print_outputs(int codon_start, int start_t, int end_t, int frame, char* output_buffer, char* aa_buffer, 
         char* dna_buffer, char* sequence_head_short, char* dna, char* dna1, char* dna_f, char* dna_f1, 
-        char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr);
+        char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple);
 
 #endif
