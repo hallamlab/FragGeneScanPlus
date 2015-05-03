@@ -1,51 +1,61 @@
 Installation
 =============
-To install FragGeneScan, please follow the steps below:
+To install FragGeneScanPlus, please follow the steps below:
 
-1. Untar the downloaded file "FragGeneScan.tar.gz". This will automatically generate the directory "FragGeneScan".
+1. Untar the downloaded file "FragGeneScanPlus.tar.gz". This will automatically generate the directory "FragGeneScan".
 
-2. Make sure that you also have a C compiler such as "gcc" and perl interpreter.
+2. Make sure that you also have the gcc C compiler.
 
-3. Run "makefile" to compile and build excutable "FragGeneScan"
+3. Run "makefile" to compile and build executable "FGS+"
 	make clean
-	make fgs
+	make
+
+If the Operation System is a Mac then running make will compile fine. If the Operating System is of a Linux distribution, remove
+the -DMAC_SEM portion from the Makefile and then run make. 
 
 
 Running the program
 ====================
-1.  To run FragGeneScan, 
+1.  To run FragGeneScanPLus, 
 
-.FragGeneScan -genome=[seq_file_name] -out=[output_file_name] -complete=[1 or 0] -train=[train_file_name] -thread=[num_thread]
+USAGE: ./FGS+ -s [seq_file_name] -m [max_mem_use] -o [output_file_name] -w [1 or 0] -t [train_file_name] -p [thread_num] -e [1 or 0] -d [1 or 0] 
 
-[seq_file_name]: sequence file name including the full path
-[output_file_name]: output file name including the full path
-[whole_genome]: 1 if the sequence file has complete genomic sequences
-		0 if the sequence file has short sequence reads
-[train_file_name]: file name that contains model parameters; this file should be in the "train" directory. 
-		   Note that four files containing model parameters already exist in the "train" directory. 
-		   [complete] for complete genomic sequences or short sequence reads without sequencing error
-		   [sanger_5] for Sanger sequencing reads with about 0.5% error rate
-		   [sanger_10] for Sanger sequencing reads with about 1% error rate
-		   [454_5] for 454 pyrosequencing reads with about 0.5% error rate
-		   [454_10] for 454 pyrosequencing reads with about 1% error rate
-		   [454_30] for 454 pyrosequencing reads with about 3% error rate
-		   [illumina_5] for Illumina sequencing reads with about 0.5% error rate
-		   [illumina_10] for Illumina sequencing reads with about 1% error rate
-[num_thread]: number of thread used in FragGeneScan. Default 1.
+INFO: FragGeneScan will only output the amino acid files by default. To obtain the gene coordinate information set -e to 1 and for the DNA files set -d to 1
+
+       Mandatory parameters
+       -s [seq_file_name]:    sequence file name including the full path
+       -o [output_file_name]: output file name including the full path
+       -w [1 or 0]:           1 if the sequence file has complete genomic sequences
+                              0 if the sequence file has short sequence reads
+       -t [train_file_name]:  file name that contains model parameters; this file should be in the "train" directory
+                           Note that four files containing model parameters already exist in the "train" directory
+                           [complete] for complete genomic sequences or short sequence reads without sequencing error
+                           [sanger_5] for Sanger sequencing reads with about 0.5% error rate
+                           [sanger_10] for Sanger sequencing reads with about 1% error rate
+                           [454_5] for 454 pyrosequencing reads with about 0.5% error rate
+                           [454_10] for 454 pyrosequencing reads with about 1% error rate
+                           [454_30] for 454 pyrosequencing reads with about 3% error rate
+                           [illumina_5] for Illumina sequencing reads with about 0.5% error rate
+                           [illumina_10] for Illumina sequencing reads with about 1% error rate
+
+       Optional flags
+       -p [thread_num]     The number of threads used by FragGeneScan; default is 1 thread.
+       -e [1 or 0]         Output metadata for sequences.
+       -d [1 or 0]         Output DNA file.
+       -m [max_mem_usage]  Maximum amount of memory to be used per thread, in megabytes, default 1024 for 1GB
 
 
+2. To test FragGeneScanPlus with a complete genomic sequence,
 
-2. To test FragGeneScan with a complete genomic sequence,
-
-./FragGeneScan -genome=./example/NC_000913.fna -out=./example/NC_000913.test  -complete=1  -train=complete
+./FGS+ -genome=./example/NC_000913.fna -out=./example/NC_000913.test  -complete=1  -train=complete
 
 [NC_000913.fna]: this sequence file has the complete genomic sequence of E.coli
 
 
 
-3. To test FragGeneScan with sequencing reads,
+3. To test FragGeneScanPlus with sequencing reads,
 
-./FragGeneScan -genome=./example/NC_000913-454.fna -out=./example/NC_000913-454.test  -complete=0  -train=454_10
+./FGS+ -genome=./example/NC_000913-454.fna -out=./example/NC_000913-454.test  -complete=0  -train=454_10
 
 [NC_000913-454.fna]: this sequence file has simulated reads (pyrosequencing, average length = 400 bp and sequencing error = 1%) generated using Metasim
 
@@ -54,9 +64,38 @@ Running the program
 
 Output
 ============
-Upon completion, FragGeneScan generates three files. 
+Upon completion, FragGeneScanPlus can generate three files [output_file_name].faa , [output_file_name].out and [output_file_name].ffn. 
 
-1. The first file is "[output_file_name].out", which lists the coordinates of putative genes. This file consists of five columns (start position, end position, strand, frame, score).  For example,
+1. The "[output_file_name].faa" file lists amino acid sequences corresponding to the putative genes in "[output_file_name].out". 
+The "[output_file_name].faa" file is always generated and needs no flags to trigger it's output.
+An example of the "[output_file_name].faa" file looks like this,
+
+>gi|49175990|ref|NC_000913.2| Escherichia coli str. K-12 substr. MG1655, complete genome start=108 e
+nd=338 strand=-
+VVTSLPLVEKKSPHCQVRAFFCVSCTRQPAPLPVVMVMVVVMVVLMRFMDVVYSVIFICLCAMPILVKVFSDLSQ
+>gi|49175990|ref|NC_000913.2| Escherichia coli str. K-12 substr. MG1655, complete genome start=343 e
+nd=2799 strand=+
+LKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKITNHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIKH
+VLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHYLESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLG
+RNGSDYSAAVLAACLRADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQFQIPCLIKNTGNPQAPGTLIGASRDEDE
+LPVKGISNLNNMAMFSVSGPGMKGMVGMAARVFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAVTERLAIISVVG
+DGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATTGVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSWLKNKHIDLRVCGV
+ANSKALLTNVHGLNLENWQEELAQAKEPFNLGRLIRLVKEYHLLNPVIVDCTSSQAVADQYADFLREGFHVVTPNKKANTSSMDYYHQLRYAAEKSRRKF
+LYDTNVGAGLPVIENLQNLLNAGDELMKFSGILSGSLSYIFGKLDEGMSFSEATTLAREMGYTEPDPRDDLSGMDVARKLLILARETGRELELADIEIEP
+VLPAEFNAEGDVAAFMANLSQLDDLFAARVAKARDEGKVLRYVGNIDEDGVCRVKIAEVDGNDPLFKVKNGENALAFYSHYYQPLPLVLRGYGAGNDVTA
+AGVFADLLRTLSWKLGV
+>gi|49175990|ref|NC_000913.2| Escherichia coli str. K-12 substr. MG1655, complete genome start=2801
+end=3733 strand=+
+VKVYAPASSANMSVGFDVLGAAVTPVDGALLGDVVTVEAAETFSLNNLGRFADKLPSEPRENIVYQCWERFCQELGKQIPVAMTLEKNMPIGSGLGSSAC
+SVVAALMAMNEHCGKPLNDTRLLALMGELEGRISGSIHYDNVAPCFLGGMQLMIEENDIISQQVPGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQDCI
+AHGRHLAGFIHACYSRQPELAAKLMKDVIAEPYRERLLPGFRQARQAVAEIGAVASGISGSGPTLFALCDKPETAQRVADWLGKNYLQNQEGFVHICRLD
+TAGARVLEN
+
+
+
+2. The "[output_file_name].out" file lists the coordinates of putative genes. This file consists of five columns (start position, end position, strand, frame, score).
+This file is not automatically generated. To obtain this file set the -e flag to 1
+An example of the "[output_file_name].out" file looks like this,
 
 >gi|49175990|ref|NC_000913.2| Escherichia coli str. K-12 substr. MG1655, complete genome
 108     440     -       3       1.378688
@@ -70,7 +109,9 @@ Upon completion, FragGeneScan generates three files.
 9306    9893    +       3       1.317067
 
 
-2. The second file is  '[output_file_name].ffn", which lists nucleotide sequences corresponding to the putative genes in "[output_file_name].out". For example,
+3. The "[output_file_name].ffn" file lists nucleotide sequences corresponding to the putative genes in "[output_file_name].out".
+This file is not automatically generated. To obtain this file set the -d flag to 1
+An example of the "[output_file_name].out" file looks like this,
 
 >gi|49175990|ref|NC_000913.2| Escherichia coli str. K-12 substr. MG1655, complete genome start=108 e
 nd=338 strand=-
@@ -107,10 +148,3 @@ VKVYAPASSANMSVGFDVLGAAVTPVDGALLGDVVTVEAAETFSLNNLGRFADKLPSEPRENIVYQCWERFCQELGKQIP
 SVVAALMAMNEHCGKPLNDTRLLALMGELEGRISGSIHYDNVAPCFLGGMQLMIEENDIISQQVPGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQDCI
 AHGRHLAGFIHACYSRQPELAAKLMKDVIAEPYRERLLPGFRQARQAVAEIGAVASGISGSGPTLFALCDKPETAQRVADWLGKNYLQNQEGFVHICRLD
 TAGARVLEN
-
-
-
-License
-============
-Copyright (C) 2010 Mina Rho, Yuzhen Ye and Haixu Tang.
-You may redistribute this software under the terms of the GNU General Public License.
