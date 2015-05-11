@@ -2,8 +2,6 @@
 #include "util_lib.h"
 #include "fasta.h"
 #include <stdio.h>
-#undef READER_WRITER 
-//#define READER_WRITER 
 
 unsigned int ids; // thread id
 unsigned int threadnum = 1;
@@ -28,16 +26,9 @@ long viterbi_counter = 0;
 long num_writes = 0, num_reads=0;
 unsigned int num_reads_flag = 0;
 
-
-#ifdef MAC_SEM
-sem_t *work_sema;
-sem_t *stop_sema;
-sem_t *counter_sema;
-#else
-sem_t work_sema;
-sem_t stop_sema;
-sem_t counter_sema;
-#endif
+SEM_T work_sema;
+SEM_T stop_sema;
+SEM_T counter_sema;
 
 unsigned int MAX_BYTES_PER_BUFFER;
 unsigned int MAX_SEQS_PER_BUFFER;
@@ -203,7 +194,7 @@ int main (int argc, char **argv) {
    // FILE* fp = 0;
     FASTAFILE* fp = 0;
 
-#ifdef MAC_SEM
+#ifdef __APPLE__
     sem_unlink("/work_sema");
     if ( ( work_sema = sem_open("/work_sema", O_CREAT, 0644, 1)) == SEM_FAILED ) {
         perror("sem_open");
@@ -246,7 +237,7 @@ int main (int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-#else
+#elif __linux
     sem_init(&work_sema, 0, 1);
     sem_init(&sema_Q, 0, 1);   
     sem_init(&sema_R, 0, 1);
@@ -296,11 +287,7 @@ int main (int argc, char **argv) {
     for(j=0; j<threadnum; j++) {
         for(i=0;i<2;i++) {
             if( (stopped_at_fpos = read_seq_into_buffer(fp, thread_datas + j, i))!=0){
-            #ifdef MAC_SEM
                 sem_post(thread_datas[j].sema_r);                    
-            #else
-                sem_post(&thread_datas[j].sema_r);                    
-            #endif
             }
         }
     }
@@ -312,52 +299,22 @@ int main (int argc, char **argv) {
     // main master loop - while we haven't exhausted reading the file yet
 
     while (stopped_at_fpos!=0) {
-#ifdef MAC_SEM
         sem_wait(sema_r);
-#else
-        sem_wait(&sema_r);
-#endif
 
-
-
-#ifdef MAC_SEM
         sem_wait(sema_Q);        
         QUEUE* temp;
         cutnpaste_q(&temp, EMPTY_Q);
         sem_post(sema_Q);
-#else
-        sem_wait(&sema_Q);        
-        QUEUE* temp;
-        cutnpaste_q(&temp, EMPTY_Q);
-        sem_post(&sema_Q);
-#endif
 
         while(temp) {
-#ifdef MAC_SEM
             sem_wait(sema_R);
-#else
-            sem_wait(&sema_R);
-#endif
 
             //stopped_at_fpos = read_file_into_buffer(fp, stopped_at_fpos, temp->td, temp->buffer);
             stopped_at_fpos = read_seq_into_buffer(fp,  temp->td, temp->buffer);
 
-#ifdef MAC_SEM
             sem_post(sema_R);
-#else
-            sem_post(&sema_R);
-#endif
 
-
-#ifdef VERBOSE
-            printf("READER subsequent reads into %d seqs into id %d\n", temp->td->num_sequences[temp->buffer], temp->td->id);
-#endif 
-
-#ifdef MAC_SEM
             sem_post(temp->td->sema_r);
-#else
-            sem_post(&temp->td->sema_r);
-#endif
             temp = temp->next;
         }
     }
@@ -371,13 +328,9 @@ int main (int argc, char **argv) {
 
     num_reads_flag =1;
 
-#ifdef MAC_SEM
     sem_wait(stop_sema);
-#else
-    sem_wait(&stop_sema);
-#endif
 
-#ifdef MAC_SEM
+#ifdef __APPLE__
     sem_unlink("/work_sema");
     sem_unlink("/sema_Q");
     sem_unlink("/sema_R");
@@ -394,7 +347,6 @@ int main (int argc, char **argv) {
        sprintf(name, "/sema_w%d", j);
        sem_unlink(name);
     }
-
 #endif
 
     printf("Run finished with %d threads.\n", threadnum);
@@ -413,23 +365,14 @@ int read_seq_into_buffer(FASTAFILE* ffp, thread_data* thread_data, unsigned int 
   int count=0;
 
   while ( (count < MAX_SEQS_PER_BUFFER) && (status = ReadFASTA(ffp, &seq, &name, &L)) ==1 ) {
-      //printf(">%s\n", name);
-      //printf("%s\n",  seq);
       strcpy(thread_data->input_head_buffer[buf][count], name);
       strcpy(thread_data->input_buffer[buf][count], seq);
       read_counter++;
-    //  free(seq);
-     // free(name);
       count++;
   }
 
   thread_data->input_num_sequences[buf] = count;
   read_counter1 += thread_data->input_num_sequences[buf];
-
-#ifdef READER_WRITER
-    printf("READER : %d - %d  %d\n", thread_data->id, buf, count);
-#endif
-
 
   return count;
 
@@ -448,8 +391,6 @@ off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsign
     long long total_count = 0;
     int seq_length; 
 
-   // char* mystring = (char*) malloc(sizeof(char) * STRINGLEN);
-   // char* complete_sequence = (char*) malloc(sizeof(char) * STRINGLEN);
    memset(complete_sequence, 0, STRINGLEN);
    memset(mystring, 0, STRINGLEN);
 
@@ -461,7 +402,6 @@ off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsign
                 total_count += i;
                 memset(thread_data->input_buffer[buf][count], 0, STRINGLEN);
                 strcpy(thread_data->input_buffer[buf][count], complete_sequence);
-                //if (strlen(complete_sequence) > 70) { read_counter++;}
                 printf("%s\n",thread_data->input_buffer[buf][count]);
                 memset(complete_sequence, 0, STRINGLEN);
             }   
@@ -491,11 +431,6 @@ off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsign
     }   
     num_reads++;
 
-#ifdef READER_WRITER
-    printf("READER : %d - %d  %ld\n", thread_data->id, buf, count);
-#endif
-
-
     return last_carat_position;
 }
 
@@ -512,7 +447,7 @@ void init_thread_data(thread_data* td){
     td->id = ids;
     ids++;
 
-#ifdef MAC_SEM
+#ifdef __APPLE__
     char name[40];
     sprintf(name, "/sema_r%d", td->id);
     sem_unlink(name);
@@ -533,7 +468,7 @@ void init_thread_data(thread_data* td){
    // sem_post(td->sema_w);
   //  sem_post(td->sema_w);
 
-#else
+#elif __linux
     sem_init(&td->sema_r, 0, 0);
     sem_init(&td->sema_w, 0, 2);
 #endif
@@ -612,37 +547,18 @@ void* writer_func(void* args) {
 
     while(1) {
         // write out results
-#ifdef MAC_SEM
         sem_wait(sema_w);
-#else
-        sem_wait(&sema_w);
-#endif
 
         QUEUE* temp;
 
-#ifdef MAC_SEM
         sem_wait(sema_Q);
-#else
-        sem_wait(&sema_Q);
-#endif
         cutnpaste_q(&temp, DONE_Q);
-#ifdef MAC_SEM
         sem_post(sema_Q);
-#else
-        sem_post(&sema_Q);
-#endif
 
         while(temp) {
 
-#ifdef MAC_SEM
             sem_wait(sema_R);
-#else
-            sem_wait(&sema_R);
-#endif
 
-#ifdef VERBOSE
-            printf("WRITER : tid %d temp %p buffer %d\n", temp->td->id, temp, temp->buffer); 
-#endif
             thread_data* td = temp->td;
             unsigned int buffer = temp->buffer;
 
@@ -701,13 +617,8 @@ void* writer_func(void* args) {
 
             //td->num_sequences[buffer] = 0;
 
-#ifdef MAC_SEM
             sem_post(sema_R);
             sem_post(td->sema_w);
-#else
-            sem_post(&sema_R);
-            sem_post(&td->sema_w);
-#endif
 
             temp = temp->next;
             /*
@@ -717,18 +628,11 @@ void* writer_func(void* args) {
                */
         }
     //    printf("Total reads = %ld   total writes = %ld\n", num_reads, num_writes);
-#ifdef READER_WRITER
-       printf("Total reads = %ld   total writes = %ld\n", read_counter, writer_counter);
-#endif
      
         if(num_reads_flag == 1 && writer_counter ==  read_counter)   {
 
-#ifdef MAC_SEM
           printf("TERMINATING\n");
           sem_post(stop_sema);
-#else
-          sem_post(&stop_sema);
-#endif
           break;
         }
     }
@@ -742,30 +646,13 @@ void* thread_func(void *_thread_datas) {
     unsigned int i;
 
     while(1) {
-#ifdef MAC_SEM
         sem_wait(td->sema_r);
         sem_wait(td->sema_w);
-#else
-        sem_wait(&td->sema_r);
-        sem_wait(&td->sema_w);
-#endif
 
 
-#ifdef READER_WRITER
-        printf("   WORKER : %d - %d   WORK : %d\n", td->id, b,  td->input_num_sequences[b]);
-#endif
-
-
-
-#ifdef MAC_SEM
         sem_wait(counter_sema);
         viterbi_counter +=  td->input_num_sequences[b];
         sem_post(counter_sema);
-#else
-        sem_wait(&counter_sema);
-        viterbi_counter +=  td->input_num_sequences[b];
-        sem_post(&counter_sema);
-#endif
 
         //viterbi_counter +=  td->num_sequences[b];
         for (i=0; i < td->input_num_sequences[b]; i++) {
@@ -792,38 +679,22 @@ void* thread_func(void *_thread_datas) {
                // strcpy(td->output_buffer[b][i], td->aa_buffer[b][i]);
                 //printf("%s",td->output_buffer[b][i]);
 
-#ifdef MAC_SEM
                 sem_wait(work_sema);
                 work_counter++;
                 sem_post(work_sema);
-#else
-                sem_wait(&work_sema);
-                work_counter++;
-                sem_post(&work_sema);
-#endif
             }
 
         }
         td->output_num_sequences[b] = td->input_num_sequences[b]; 
 
         if (verbose) printf("INFO: Thread %d buffer %d done work on %d sequences!\n", td->id, b, td->input_num_sequences[b]);
-#ifdef MAC_SEM
         sem_wait(sema_Q);
-#else
-        sem_wait(&sema_Q);
-#endif
         enqueue(td, b, EMPTY_Q);
         enqueue(td, b, DONE_Q);
 
-#ifdef MAC_SEM
         sem_post(sema_Q);
         sem_post(sema_r);
         sem_post(sema_w);
-#else
-        sem_post(&sema_Q);
-        sem_post(&sema_r);
-        sem_post(&sema_w);
-#endif
 
 
         b = (b + 1) % 2;

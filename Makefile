@@ -1,5 +1,5 @@
 CC=	gcc 
-CFLAG= -O3 -m64 -DMAC_SEM -w
+CFLAG= -O3 -m64 -w
 FLAGS= -lm -lpthread  
 HEADER=	util_lib.h fasta.h
 SRCS=	util_lib.c hmm_lib.c run_hmm.c fasta.c

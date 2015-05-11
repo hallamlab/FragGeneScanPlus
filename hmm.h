@@ -104,18 +104,18 @@ char dstate_file[STRINGLEN];
 char train_dir[STRINGLEN];
 
 // semaphores
-
-#ifdef MAC_SEM
-sem_t *sema_Q;
-sem_t *sema_R;
-sem_t *sema_r;
-sem_t *sema_w;
-#else
-sem_t sema_Q;
-sem_t sema_R;
-sem_t sema_r;
-sem_t sema_w;
+#ifdef __APPLE__
+  typedef sem_t* SEM_T;
+#elif __linux
+  typedef sem_t SEM_T;
 #endif
+
+SEM_T sema_Q;
+SEM_T sema_R;
+SEM_T sema_r;
+SEM_T sema_w;
+
+
 typedef struct {
 
     double  pi[29];    /* pi[1..N] pi[i] is the initial state distribution. */
@@ -187,20 +187,14 @@ typedef struct thread_data
     unsigned int** acceptable_buffer;
 
 
-#ifdef MAC_SEM
-    sem_t *sema_r;
-    sem_t *sema_w;
-#else
-    sem_t sema_r;
-    sem_t sema_w;
-#endif
+    SEM_T sema_r;
+    SEM_T sema_w;
 } thread_data;
 
 thread_data *thread_datas;
 
 HMM hmm;
 TRAIN train;
-
 
 void init_thread_data(thread_data* td);
 off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsigned int buf);
