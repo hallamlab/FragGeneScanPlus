@@ -18,7 +18,6 @@
 #include <ctype.h>
 #include "fasta.h"
 
-
 #define DONE_Q 0
 #define EMPTY_Q 1
 #define STRINGLEN 512
@@ -70,7 +69,6 @@
 #define I4_STATE_1 26
 #define I5_STATE_1 27
 #define I6_STATE_1 28
-
 
 #define TR_MM 0
 #define TR_MI 1
@@ -221,4 +219,10 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
         char* dna_buffer, char* sequence_head_short, char* dna, char* dna1, char* dna_f, char* dna_f1, 
         char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple);
 
+// helper functions to cleanup the main function
+void conductWork();
+void initializeThreads();
+void destroySemaphores();
+void initializeSemaphores();
+void setupProgram(int argc, char** argv);
 #endif

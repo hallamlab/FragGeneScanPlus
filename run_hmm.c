@@ -10,11 +10,13 @@ unsigned int wholegenome;
 unsigned int output_dna;
 unsigned int output_meta;
 unsigned int verbose;
+unsigned int MAX_BYTES_PER_BUFFER;
+unsigned int MAX_SEQS_PER_BUFFER;
+unsigned int num_reads_flag = 0;
 
 pthread_t writer_thread;
 long long round_counter;
 off_t stopped_at_fpos; // tracks how far we've read in the input 
-
 
 long writer_counter = 0;
 long read_counter = 0;
@@ -22,23 +24,24 @@ long read_counter1 = 0;
 long work_counter = 0;
 long total_reads = -1;
 long viterbi_counter = 0;
-
 long num_writes = 0, num_reads=0;
-unsigned int num_reads_flag = 0;
 
 SEM_T work_sema;
 SEM_T stop_sema;
 SEM_T counter_sema;
 
-unsigned int MAX_BYTES_PER_BUFFER;
-unsigned int MAX_SEQS_PER_BUFFER;
-
 FILE* outfile_fp;
 FILE* dna_outfile_fp;
 
-int main (int argc, char **argv) {
+char mystring[STRINGLEN];
+char complete_sequence[STRINGLEN];
+
+FASTAFILE* fp;
+
+void setupProgram(int argc, char** argv){
 
     int max_mem = 0;
+    fp = 0;
     strncpy(train_dir, argv[0], strlen(argv[0])-4);
     strcat(train_dir, "train/");
     strcpy(mstate_file, train_dir);
@@ -179,20 +182,13 @@ int main (int argc, char **argv) {
     MAX_BYTES_PER_BUFFER = max_mem*1000000/(5*2*threadnum);
     MAX_SEQS_PER_BUFFER = MAX_BYTES_PER_BUFFER/STRINGLEN;
 
-    if (verbose)
-        printf("DEBUG: Max number of sequences per thread : %d, max bytes per thread : %d\n", MAX_SEQS_PER_BUFFER, MAX_BYTES_PER_BUFFER*5);
+    // remove them, if they already exist
+    remove(aa_file);
+    if (output_meta) remove(out_file);
+    if (output_dna) remove(dna_file);
+}
 
-    /* read all initial model */
-    get_train_from_file(hmm_file, &hmm, mstate_file, rstate_file, nstate_file, sstate_file, pstate_file,s1state_file, p1state_file, dstate_file, &train);
-
-    pthread_t *thread = malloc(sizeof(pthread_t*) * threadnum);
-    memset(thread, 0, sizeof(pthread_t*) * threadnum);
-    thread_datas = malloc(sizeof(thread_data) * threadnum);
-
-   // memset(thread_datas, 0, sizeof(thread_data) * threadnum);
-
-   // FILE* fp = 0;
-    FASTAFILE* fp = 0;
+void initializeSemaphores(){
 
 #ifdef __APPLE__
     sem_unlink("/work_sema");
@@ -246,11 +242,37 @@ int main (int argc, char **argv) {
     sem_init(&stop_sema, 0, 0);
     sem_init(&counter_sema, 0, 1);
 #endif
+}
 
-    // remove them, if they already exist
-    remove(aa_file);
-    if (output_meta) remove(out_file);
-    if (output_dna) remove(dna_file);
+void destroySemaphores(){
+
+#ifdef __APPLE__
+    sem_unlink("/work_sema");
+    sem_unlink("/sema_Q");
+    sem_unlink("/sema_R");
+    sem_unlink("/sema_r");
+    sem_unlink("/sema_w");
+    sem_unlink("/stop_sema");
+    sem_unlink("/COUNTER_SEMA");
+
+    char name[40];
+    int j;
+    for(j=0; j<threadnum; j++) {
+       sprintf(name, "/sema_r%d", j);
+       sem_unlink(name);
+
+       sprintf(name, "/sema_w%d", j);
+       sem_unlink(name);
+    }
+#endif
+
+}
+
+void initializeThreads(){
+
+    pthread_t *thread = malloc(sizeof(pthread_t*) * threadnum);
+    memset(thread, 0, sizeof(pthread_t*) * threadnum);
+    thread_datas = malloc(sizeof(thread_data) * threadnum);
 
     // allocate memory for each thread only once!
     if (verbose)
@@ -268,7 +290,6 @@ int main (int argc, char **argv) {
 
     pthread_create(&writer_thread, 0, writer_func, 0);
 
-    //fp = fopen (seq_file, "r");
     fp = OpenFASTA(seq_file);
 
     if (!fp) {
@@ -295,8 +316,11 @@ int main (int argc, char **argv) {
     if (verbose)
         printf("INFO : Initializing worker threads...\n");
 
+}
 
-    // main master loop - while we haven't exhausted reading the file yet
+void conductWork(){
+
+    // master loop - while we haven't exhausted reading the file yet
 
     while (stopped_at_fpos!=0) {
         sem_wait(sema_r);
@@ -323,38 +347,37 @@ int main (int argc, char **argv) {
     if (verbose)
         printf("INFO : Finished handing out all the work...\n");
 
-    //total_reads = read_counter;
-   // printf("Done reading %ld \n", total_reads);
-
     num_reads_flag =1;
 
     sem_wait(stop_sema);
+}
 
-#ifdef __APPLE__
-    sem_unlink("/work_sema");
-    sem_unlink("/sema_Q");
-    sem_unlink("/sema_R");
-    sem_unlink("/sema_r");
-    sem_unlink("/sema_w");
-    sem_unlink("/stop_sema");
-    sem_unlink("/COUNTER_SEMA");
+int main (int argc, char **argv) {
 
-    char name[40];
-    for(j=0; j<threadnum; j++) {
-       sprintf(name, "/sema_r%d", j);
-       sem_unlink(name);
+    // read in options and setup the necessary variables
+    setupProgram(argc, argv);
+    
+    // setup all of the semaphores
+    initializeSemaphores();
 
-       sprintf(name, "/sema_w%d", j);
-       sem_unlink(name);
-    }
-#endif
+    if (verbose)
+        printf("DEBUG: Max number of sequences per thread : %d, max bytes per thread : %d\n", MAX_SEQS_PER_BUFFER, MAX_BYTES_PER_BUFFER*5);
+
+    /* read all initial model */
+    get_train_from_file(hmm_file, &hmm, mstate_file, rstate_file, nstate_file, sstate_file, pstate_file,s1state_file, p1state_file, dstate_file, &train);
+
+    // prepare all of the worker threads as well as the writer thread
+    initializeThreads();
+
+    // master loop - while we haven't exhausted reading the file yet
+    conductWork();
+
+    // destroy the semaphores if we have a mac machine
+    destroySemaphores();
 
     printf("Run finished with %d threads.\n", threadnum);
-    printf("#Seq read :%ld, %ld  #seq viterbied : %ld  # seq written :  %ld \n", read_counter, read_counter1,  viterbi_counter, writer_counter);
+    //printf("#Seq read :%ld, %ld  #seq viterbied : %ld  # seq written :  %ld \n", read_counter, read_counter1,  viterbi_counter, writer_counter);
 }
-char mystring[STRINGLEN];
-char complete_sequence[STRINGLEN];
-
 
 int read_seq_into_buffer(FASTAFILE* ffp, thread_data* thread_data, unsigned int buf) {
 
@@ -377,9 +400,6 @@ int read_seq_into_buffer(FASTAFILE* ffp, thread_data* thread_data, unsigned int 
   return count;
 
 }
-
-
-
 
 // read as much of the file as you can into the buffer, return the file position
 // of the last carat character encountered before the memory limit was hit
@@ -464,10 +484,6 @@ void init_thread_data(thread_data* td){
         exit(EXIT_FAILURE);
     }
 
-
-   // sem_post(td->sema_w);
-  //  sem_post(td->sema_w);
-
 #elif __linux
     sem_init(&td->sema_r, 0, 0);
     sem_init(&td->sema_w, 0, 2);
@@ -510,14 +526,6 @@ void init_thread_data(thread_data* td){
         td->aa_buffer[i]	=   (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
         td->dna_buffer[i]	= (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
         td->acceptable_buffer[i] = (unsigned int *)malloc(sizeof(unsigned int) * MAX_SEQS_PER_BUFFER);
-
-        /*   memset(td->input_buffer[i], 0, sizeof(char*) * MAX_SEQS_PER_BUFFER);
-             memset(td->input_head_buffer[i], 0, sizeof(char*) * MAX_SEQS_PER_BUFFER);
-             memset(td->output_buffer[i], 0, sizeof(char*) * MAX_SEQS_PER_BUFFER);
-             memset(td->aa_buffer[i], 0, sizeof(char*) * MAX_SEQS_PER_BUFFER);
-             memset(td->dna_buffer[i], 0, sizeof(char*) * MAX_SEQS_PER_BUFFER);
-             memset(td->acceptable_buffer[i], 0, sizeof(unsigned int) * MAX_SEQS_PER_BUFFER);
-             */
 
         int j;
         for(j=0;j<MAX_SEQS_PER_BUFFER;j++){
@@ -581,7 +589,6 @@ void* writer_func(void* args) {
 
             num_writes++;
             for(j = 0; j < td->output_num_sequences[buffer]; j++) {
-                //fprintf(aa_outfile_fp, ">xx\n");
                 writer_counter++;
                 char *ptrc;
                 if(td->aa_buffer[buffer][j][0]!=0) {
@@ -593,15 +600,6 @@ void* writer_func(void* args) {
                   }
 
                   fprintf(aa_outfile_fp, ">%s", td->aa_buffer[buffer][j]);
-                }
-                else {
-                  //fprintf(aa_outfile_fp, ">%s", td->aa_buffer[buffer][j]);
-                }
-                if (td->acceptable_buffer[j]) {
-
-                   // fprintf(aa_outfile_fp, "%s", td->aa_buffer[buffer][j]);
-                    //  if (output_meta) fprintf(outfile_fp, "%s", td->output_buffer[j]);
-                    // if (output_dna) fprintf(dna_outfile_fp, "%s", td->dna_buffer[j]);
                 }
                 memset(td->output_buffer[buffer][j], 0, STRINGLEN);
                 memset(td->aa_buffer[buffer][j], 0, STRINGLEN);
@@ -615,23 +613,13 @@ void* writer_func(void* args) {
             if (output_meta) fclose(outfile_fp);
             if (output_dna) fclose(dna_outfile_fp);
 
-            //td->num_sequences[buffer] = 0;
-
             sem_post(sema_R);
             sem_post(td->sema_w);
 
             temp = temp->next;
-            /*
-               old_temp = temp;
-               temp = temp->next ? temp->next : 0;
-               free(old_temp); 
-               */
         }
-    //    printf("Total reads = %ld   total writes = %ld\n", num_reads, num_writes);
      
         if(num_reads_flag == 1 && writer_counter ==  read_counter)   {
-
-          printf("TERMINATING\n");
           sem_post(stop_sema);
           break;
         }
@@ -667,8 +655,6 @@ void* thread_func(void *_thread_datas) {
 
             if (td->input_buffer[b][i] != 0 && td->input_head_buffer[b][i] != 0 ) {
                 memset(td->aa_buffer[b][i], 0, STRINGLEN );
-                //memset(td->dna_buffer[b][i], 0, STRINGLEN );
-
 
                 viterbi(td->hmm, td->input_buffer[b][i], td->output_buffer[b][i], td->aa_buffer[b][i], td->dna_buffer[b][i], 
                         td->input_head_buffer[b][i], td->wholegenome, td->format, stringlength,
@@ -676,8 +662,6 @@ void* thread_func(void *_thread_datas) {
                         td->insert, td->c_delete, td->temp_str);
 
                 td->acceptable_buffer[b][i] = 1;
-               // strcpy(td->output_buffer[b][i], td->aa_buffer[b][i]);
-                //printf("%s",td->output_buffer[b][i]);
 
                 sem_wait(work_sema);
                 work_counter++;

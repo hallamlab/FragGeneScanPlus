@@ -35,10 +35,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
     int* c_delete = c_delete_ptr;
     int insert_id, delete_id;
     int temp_i[6]   = {0,0,0,0,0,0};
-
-    //int temp_i_1[6] = {0,0,0,0,0,0};
-    //!! This is problematic. The first run will have these values of 0s and cause seg faults because we are addressing out of bounds. But I dont understand the viterbi logic behind this/
-
     int temp_i_1[6] = {1,1,1,1,1,1};
     int num_N = 0;
 
@@ -52,7 +48,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
        if( O[i]=='c' ) O[i]='C';
        if( O[i]=='g' ) O[i]='G';
     }
-    //printf("%s\n",O);
 
     if (whole_genome==1){
         gene_len = 120;
@@ -60,7 +55,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
         gene_len = 60;
     }
 
-    //!! This can be allocated up front but we've seen very long waits with this as the amount of memory required is very large.
     alpha = (double **)dmatrix(len_seq);
     path = (int **)imatrix(len_seq);
     vpath = (int *)ivector(len_seq);
@@ -408,7 +402,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
                     (hmm_ptr->tr_I_I[from][to]);
                 path[i][t] = j;
 
-                //!! guard removing this will break the functionality. I think this should actually stay here.
                 if(t<5) continue;
                 /* from M state */
                 if (path[S_STATE_1][t-3]!= R_STATE && path[S_STATE_1][t-4] !=R_STATE &&
@@ -636,11 +629,11 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
                 }
 
 
-                if ((O[t] == 'A') ){
+                if (O[t] == 'A') {
                     alpha[S_STATE][t+2] = alpha[S_STATE][t+2] - LOG_83;
-                }else if ((O[t] == 'G')){
+                }else if (O[t] == 'G'){
                     alpha[S_STATE][t+2] = alpha[S_STATE][t+2] - LOG_10;
-                }else if((O[t] == 'T')) {
+                }else if(O[t] == 'T') {
                     alpha[S_STATE][t+2] = alpha[S_STATE][t+2] - LOG_07;
                 }
 
@@ -702,11 +695,11 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
                 path[E_STATE_1][t+1] = E_STATE_1;
                 path[E_STATE_1][t+2] = E_STATE_1;
 
-                if ((O[t+2] == 'T') ){
+                if (O[t+2] == 'T'){
                     alpha[E_STATE_1][t+2] = alpha[E_STATE_1][t+2] - LOG_83;
-                }else if ((O[t+2] == 'C') ){
+                }else if (O[t+2] == 'C' ){
                     alpha[E_STATE_1][t+2] = alpha[E_STATE_1][t+2] - LOG_10;
-                }else if((O[t+2] == 'A') ){
+                }else if(O[t+2] == 'A' ){
                     alpha[E_STATE_1][t+2] = alpha[E_STATE_1][t+2] - LOG_07;
                 }
 
@@ -776,20 +769,10 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
     prob = max_dbl;
     for (i = 0; i < NUM_STATE; i++){
 
-        //!! This loop is a massive problem according to valgrind but whatever.
         if (alpha[i][len_seq-1] < prob){
             prob = alpha[i][len_seq-1];
             vpath[len_seq-1] = i;
         }
-
-        //!! I believe the len_seq-1 is due to the guy thinking that strlen counted the null terminator.
-        //!! I don't understand the purpose of this loop. Especially vpath[len_seq] = i; it doesnt make much sense
-        /*
-           if (alpha[i][len_seq] < prob) {
-           prob = alpha[i][len_seq];
-           vpath[len_seq] = i;
-           }
-         */
     }
 
     /* backtrack the opitmal path */
@@ -810,13 +793,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
         if (codon_start == 0 &&
                 (vpath[t]==M1_STATE || vpath[t]==M4_STATE ||
                  vpath[t]==M1_STATE_1 || vpath[t]==M4_STATE_1)){
-
-            /* These are unnecessary fix the code later*/
-            /* As long as these are properly null terminated, we don't need to memset this */
-            /*
-               Yeah, no clue about this but it will make it run faster and add length figure it out whenever w.e
-             */
-
 
                memset(dna,0,1500);
                memset(dna1,0,1500);
