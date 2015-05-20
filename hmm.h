@@ -106,6 +106,8 @@ char train_dir[STRINGLEN];
   typedef sem_t* SEM_T;
 #elif __linux
   typedef sem_t SEM_T;
+  #define sem_wait(x) sem_wait(&x)
+  #define sem_post(x) sem_post(&x)
 #endif
 
 SEM_T sema_Q;
