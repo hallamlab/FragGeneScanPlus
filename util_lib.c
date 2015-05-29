@@ -408,6 +408,6 @@ void print_usage(){
     printf("%s", "       -p [thread_num]     The number of threads used by FragGeneScan; default is 1 thread.\n");
     printf("%s", "       -e [1 or 0]         Output metadata for sequences.\n");
     printf("%s", "       -d [1 or 0]         Output DNA file.\n");
-    printf("%s", "       -m [max_mem_usage]  Maximum amount of memory to be used per thread, in megabytes, default 1024 for 1GB\n");
+    printf("%s", "       -m [max_mem_usage]  Maximum amount of memory to be used by the application, in megabytes, default 1024 for 1GB\n");
 
 }
