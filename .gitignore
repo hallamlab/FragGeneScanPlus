@@ -3,3 +3,6 @@ out*
 *.faa
 *.txt
 FGS+
+
+# OSX files
+.DS_Store
