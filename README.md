@@ -6,4 +6,4 @@ A fundamental step in the analysis of environmental sequence information is the 
 
 More information can be found on the [Wiki](https://github.com/hallamlab/FragGeneScanPlus/wiki).
 
-Performance analysis and code can be found in [fgsp_results/](fgsp_results/)
+Performance analysis and code can be found in [fgsp_results/](fgsp_results/).
