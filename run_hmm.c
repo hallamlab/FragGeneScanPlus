@@ -42,8 +42,10 @@ void setupProgram(int argc, char** argv){
 
     int max_mem = 0;
     fp = 0;
-    strncpy(train_dir, argv[0], strlen(argv[0])-4);
-    strcat(train_dir, "train/");
+    // strncpy(train_dir, argv[0], strlen(argv[0])-4);
+    // Set default training directory
+    strcpy(train_dir, "train");
+    strcat(train_dir, "/");
     strcpy(mstate_file, train_dir);
     strcat(mstate_file, "gene");
     strcpy(rstate_file, train_dir);
@@ -60,7 +62,6 @@ void setupProgram(int argc, char** argv){
     strcat(p1state_file, "start1");
     strcpy(dstate_file, train_dir);
     strcat(dstate_file, "pwm");
-
     /* read command line argument */
     //!! This argument reading should all be encapsulated in a single function, this will make reading the code much easier, right now we have to always move around it.
     if (argc <= 8){    
@@ -71,7 +72,7 @@ void setupProgram(int argc, char** argv){
 
     int c;    
 
-    while ((c=getopt(argc, argv, "fs:m:o:w:t:p:dev")) != -1){
+    while ((c=getopt(argc, argv, "fs:m:o:w:r:t:p:dev")) != -1){
         switch (c){
             case 's':
                 strcpy(seq_file, optarg);
@@ -107,11 +108,31 @@ void setupProgram(int argc, char** argv){
                 strcpy(dna_file, out_file);
                 strcat(dna_file, ".ffn");
                 break;
+            case 'r':
+                // Location of train directory
+                strcpy(train_dir, optarg);
+                strcat(train_dir, "/");
+                strcpy(mstate_file, train_dir);
+                strcat(mstate_file, "gene");
+                strcpy(rstate_file, train_dir);
+                strcat(rstate_file, "rgene");
+                strcpy(nstate_file, train_dir);
+                strcat(nstate_file, "noncoding");
+                strcpy(sstate_file, train_dir);
+                strcat(sstate_file, "start");
+                strcpy(pstate_file, train_dir);
+                strcat(pstate_file, "stop");
+                strcpy(s1state_file, train_dir);
+                strcat(s1state_file, "stop1");
+                strcpy(p1state_file, train_dir);
+                strcat(p1state_file, "start1");
+                strcpy(dstate_file, train_dir);
+                strcat(dstate_file, "pwm");
+                break;
             case 't':
                 strcpy(train_file, optarg);
                 strcpy(hmm_file, train_dir);
                 strcat(hmm_file, train_file);
-
                 if (access(hmm_file, F_OK)==-1){
                     fprintf(stderr, "ERROR: The file for model parameters [%s] does not exist\n", hmm_file);
                     print_usage();

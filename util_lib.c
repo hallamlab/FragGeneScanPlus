@@ -394,7 +394,7 @@ void print_usage(){
     printf("%s", "       -o [output_file_name]: output file name including the full path\n");
     printf("%s", "       -w [1 or 0]:           1 if the sequence file has complete genomic sequences\n");
     printf("%s", "       		                    0 if the sequence file has short sequence reads\n");
-    printf("%s", "       -t [train_file_name]:  file name that contains model parameters; this file should be in the \"train\" directory\n");
+    printf("%s", "       -t [train_file_name]:  file name that contains model parameters; this file should be in the -r directory\n");
     printf("%s", "                           Note that four files containing model parameters already exist in the \"train\" directory\n");
     printf("%s", "                           [complete] for complete genomic sequences or short sequence reads without sequencing error\n");
     printf("%s", "                           [sanger_5] for Sanger sequencing reads with about 0.5% error rate\n");
@@ -405,6 +405,7 @@ void print_usage(){
     printf("%s", "                           [illumina_5] for Illumina sequencing reads with about 0.5% error rate\n");
     printf("%s", "                           [illumina_10] for Illumina sequencing reads with about 1% error rate\n\n");
     printf("%s", "       Optional flags\n");
+    printf("%s", "       -r [train_file_dir]:  full path of directory containing the model files. If not specified \"train/\" assumed\n");
     printf("%s", "       -p [thread_num]     The number of threads used by FragGeneScan; default is 1 thread.\n");
     printf("%s", "       -e [1 or 0]         Output metadata for sequences.\n");
     printf("%s", "       -d [1 or 0]         Output DNA file.\n");
