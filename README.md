@@ -10,4 +10,4 @@ Performance analysis and code can be found in [fgsp_results/](fgsp_results/)
 
 If using FragGeneScanPlus for academic work, please cite:
 
-Dongjae Kim, Aria S. Hahn, Shang-Ju Wu, Niels W. Hanson, Kishori M. Konwar, Steven J. Hallam. FragGeneScan+: high-throughput short-read gene prediction, Proceedings of the 2015 IEEE Conference on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB 2015), Niagara Falls, Canada, August 12-15, 2015. [doi:10.1109/cibcb.2015.7300341](http://dx.doi.org/10.1109/cibcb.2015.7300341).
+Dongjae Kim, Aria S. Hahn, Shang-Ju Wu, Niels W. Hanson, Kishori M. Konwar, Steven J. Hallam. *FragGeneScan+: high-throughput short-read gene prediction*, Proceedings of the 2015 IEEE Conference on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB 2015), Niagara Falls, Canada, August 12-15, 2015. [doi:10.1109/cibcb.2015.7300341](http://dx.doi.org/10.1109/cibcb.2015.7300341).
