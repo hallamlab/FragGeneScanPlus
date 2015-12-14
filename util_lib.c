@@ -402,6 +402,7 @@ void print_usage(){
     printf("%s", "                           [454_5] for 454 pyrosequencing reads with about 0.5% error rate\n");
     printf("%s", "                           [454_10] for 454 pyrosequencing reads with about 1% error rate\n");
     printf("%s", "                           [454_30] for 454 pyrosequencing reads with about 3% error rate\n");
+    printf("%s", "                           [illumina_1] for Illumina sequencing reads with about 0.1% error rate\n");
     printf("%s", "                           [illumina_5] for Illumina sequencing reads with about 0.5% error rate\n");
     printf("%s", "                           [illumina_10] for Illumina sequencing reads with about 1% error rate\n\n");
     printf("%s", "       Optional flags\n");
