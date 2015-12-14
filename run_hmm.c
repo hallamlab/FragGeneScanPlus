@@ -340,9 +340,7 @@ void initializeThreads(){
 }
 
 void conductWork(){
-
     // master loop - while we haven't exhausted reading the file yet
-
     while (stopped_at_fpos!=0) {
         sem_wait(sema_r);
 
@@ -353,10 +351,7 @@ void conductWork(){
 
         while(temp) {
             sem_wait(sema_R);
-
-            //stopped_at_fpos = read_file_into_buffer(fp, stopped_at_fpos, temp->td, temp->buffer);
             stopped_at_fpos = read_seq_into_buffer(fp,  temp->td, temp->buffer);
-
             sem_post(sema_R);
 
             sem_post(temp->td->sema_r);
@@ -397,7 +392,6 @@ int main (int argc, char **argv) {
     destroySemaphores();
 
     printf("Run finished with %d threads.\n", threadnum);
-    //printf("#Seq read :%ld, %ld  #seq viterbied : %ld  # seq written :  %ld \n", read_counter, read_counter1,  viterbi_counter, writer_counter);
 }
 
 int read_seq_into_buffer(FASTAFILE* ffp, thread_data* thread_data, unsigned int buf) {
@@ -591,7 +585,6 @@ void* writer_func(void* args) {
             thread_data* td = temp->td;
             unsigned int buffer = temp->buffer;
 
-
             if (output_meta) {
                 outfile_fp = fopen(out_file, "a");
                 if(!outfile_fp) {
@@ -613,24 +606,20 @@ void* writer_func(void* args) {
                 writer_counter++;
                 char *ptrc;
                 if(td->aa_buffer[buffer][j][0]!=0) {
+                    ptrc=td->aa_buffer[buffer][j];
+                    while(*ptrc!='\0'){
+                        if(*ptrc=='\t') *ptrc='>';
+                        ptrc++;
+                    }
 
-                  ptrc=td->aa_buffer[buffer][j];
-                  while(*ptrc!='\0'){
-                     if(*ptrc=='\t') *ptrc='>';
-                     ptrc++;
-                  }
-
-                  fprintf(aa_outfile_fp, ">%s", td->aa_buffer[buffer][j]);
+                    fprintf(aa_outfile_fp, ">%s", td->aa_buffer[buffer][j]);
                 }
                 memset(td->output_buffer[buffer][j], 0, STRINGLEN);
                 memset(td->aa_buffer[buffer][j], 0, STRINGLEN);
                 memset(td->dna_buffer[buffer][j], 0, STRINGLEN);
             }
 
-
-
             if (verbose) printf("INFO: Wrote results for thread %d, buffer %d.\n", td->id, buffer );
-
             if (output_meta) fclose(outfile_fp);
             if (output_dna) fclose(dna_outfile_fp);
 
@@ -658,23 +647,15 @@ void* thread_func(void *_thread_datas) {
         sem_wait(td->sema_r);
         sem_wait(td->sema_w);
 
-
         sem_wait(counter_sema);
         viterbi_counter +=  td->input_num_sequences[b];
         sem_post(counter_sema);
 
-        //viterbi_counter +=  td->num_sequences[b];
         for (i=0; i < td->input_num_sequences[b]; i++) {
             unsigned int stringlength = strlen(td->input_buffer[b][i]);
             get_prob_from_cg(td->hmm, &train, td->input_buffer[b][i], stringlength);
    
-            if(td->input_buffer[b][i] == 0 || td->input_head_buffer[b][i] == 0 ) {
-              printf("%s\n",td->input_buffer[b][i]);  
-              printf("%s\n",td->input_head_buffer[b][i]);
-            }
-
-
-            if (td->input_buffer[b][i] != 0 && td->input_head_buffer[b][i] != 0 ) {
+            if (td->input_buffer[b][i] && td->input_head_buffer[b][i] ) {
                 memset(td->aa_buffer[b][i], 0, STRINGLEN );
 
                 viterbi(td->hmm, td->input_buffer[b][i], td->output_buffer[b][i], td->aa_buffer[b][i], td->dna_buffer[b][i], 
@@ -700,7 +681,6 @@ void* thread_func(void *_thread_datas) {
         sem_post(sema_Q);
         sem_post(sema_r);
         sem_post(sema_w);
-
 
         b = (b + 1) % 2;
     }
