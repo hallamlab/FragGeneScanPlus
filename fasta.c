@@ -84,32 +84,42 @@
  *           avoided. An example of a replacement for fgets() that dynamically
  *           allocates its buffer size and allows any line length is
  *           SQUID's sre_fgets().
- *           
- *           We use ANSI C's strtok() to parse the sequence name out of the line.
- *           strtok() is deprecated in modern programs because it is not threadsafe. 
- *           (See comments above.) An example of a threadsafe version is
- *           SQUID's sre_strtok().
- *           
- * Returns:  
- *           OpenFASTA() returns a FASTAFILE pointer, or NULL on failure (for
- *           instance, if the file doesn't exist, or isn't readable).
- *           
- *           ReadFASTA() returns 1 on success, or a 0 if there are no
- *           more sequences to read in the file.
- *           
- *           CloseFASTA() "always succeeds" and returns void.
- */
+*           
+*           We use ANSI C's strtok() to parse the sequence name out of the line.
+*           strtok() is deprecated in modern programs because it is not threadsafe. 
+*           (See comments above.) An example of a threadsafe version is
+*           SQUID's sre_strtok().
+*           
+* Returns:  
+*           OpenFASTA() returns a FASTAFILE pointer, or NULL on failure (for
+    *           instance, if the file doesn't exist, or isn't readable).
+*           
+*           ReadFASTA() returns 1 on success, or a 0 if there are no
+*           more sequences to read in the file.
+*           
+*           CloseFASTA() "always succeeds" and returns void.
+*/
 FASTAFILE * OpenFASTA(char *seqfile) {
+
   FASTAFILE *ffp;
   ffp = malloc(sizeof(FASTAFILE));
-  ffp->fp = fopen(seqfile, "r");              /* Assume seqfile exists & readable!   */
-  if (ffp->fp == NULL) { free(ffp); return NULL; } 
-  if ((fgets(ffp->buffer, FASTA_MAXLINE, ffp->fp)) == NULL)
-    { free(ffp); return NULL; }
+
+  if(strcmp(seqfile, "stdin") >= 0){
+    ffp->fp = stdin;
+  } else {
+    ffp->fp = fopen(seqfile, "r");              /* Assume seqfile exists & readable!   */
+    if (ffp->fp == NULL) { 
+      free(ffp); return NULL; 
+    } 
+    if ((fgets(ffp->buffer, FASTA_MAXLINE, ffp->fp)) == NULL) { 
+      free(ffp); return NULL; 
+    }
+  }
+
   return ffp;
 }
 
-int
+  int
 ReadFASTA(FASTAFILE *ffp, char **ret_seq, char **ret_name, int *ret_L)
 {
   char *s;
@@ -117,17 +127,17 @@ ReadFASTA(FASTAFILE *ffp, char **ret_seq, char **ret_name, int *ret_L)
   static char *seq =0;
   int   n;
   int   nalloc;
-  
+
   /* Peek at the lookahead buffer; see if it appears to be a valid FASTA descline.
-   */
+  */
   if (ffp->buffer[0] != '>') return 0;    
 
   /* Parse out the name: the first non-whitespace token after the >
-   */
+  */
   s  = strtok(ffp->buffer+1, " \t\n");
   //name = malloc(sizeof(char) * (strlen(s)+1));
   if( name==0)
-     name = malloc(sizeof(char) * 1024);
+    name = malloc(sizeof(char) * 1024);
   strcpy(name, s);
 
   /* Everything else 'til the next descline is the sequence.
@@ -140,22 +150,22 @@ ReadFASTA(FASTAFILE *ffp, char **ret_seq, char **ret_name, int *ret_L)
   nalloc = 128;
   n = 0;
   while (fgets(ffp->buffer, FASTA_MAXLINE, ffp->fp))
+  {
+    if (ffp->buffer[0] == '>') break;	/* a-ha, we've reached the next descline */
+
+    for (s = ffp->buffer; *s != '\0'; s++)
     {
-      if (ffp->buffer[0] == '>') break;	/* a-ha, we've reached the next descline */
+      if (! isalpha(*s)) continue;  /* accept any alphabetic character */
 
-      for (s = ffp->buffer; *s != '\0'; s++)
-	{
-	  if (! isalpha(*s)) continue;  /* accept any alphabetic character */
-
-	  seq[n] = *s;                  /* store the character, bump length n */
-	  n++;
-	  if (nalloc == n)	        /* are we out of room in seq? if so, expand */
-	    {			        /* (remember, need space for the final '\0')*/
-	      nalloc += 128;
-	      seq = realloc(seq, sizeof(char) * nalloc);
-	    }
-	}
+      seq[n] = *s;                  /* store the character, bump length n */
+      n++;
+      if (nalloc == n)	        /* are we out of room in seq? if so, expand */
+      {			        /* (remember, need space for the final '\0')*/
+        nalloc += 128;
+        seq = realloc(seq, sizeof(char) * nalloc);
+      }
     }
+  }
   seq[n] = '\0';
 
   *ret_name = name;
@@ -164,7 +174,7 @@ ReadFASTA(FASTAFILE *ffp, char **ret_seq, char **ret_name, int *ret_L)
   return 1;
 }      
 
-void
+  void
 CloseFASTA(FASTAFILE *ffp)
 {
   fclose(ffp->fp);
@@ -192,23 +202,23 @@ CloseFASTA(FASTAFILE *ffp)
  *  to compile:  gcc -o test -DTEST_FASTA_STUFF -Wall -g fasta.c 
  *  to run:      ./test myseqs.fa 
  */
-int
+  int
 main(int argc, char **argv)
 {
   FASTAFILE *ffp;
   char *seq;
   char *name;
   int   L;
-				/* argv[1] is the name of a FASTA file */
+  /* argv[1] is the name of a FASTA file */
   ffp = OpenFASTA(argv[1]);
   while (ReadFASTA(ffp, &seq, &name, &L))
-    {
-      printf(">%s\n", name);
-      printf("%s\n",  seq);
+  {
+    printf(">%s\n", name);
+    printf("%s\n",  seq);
 
-      free(seq);
-      free(name);
-    }
+    free(seq);
+    free(name);
+  }
   CloseFASTA(ffp);
   exit(0);
 }

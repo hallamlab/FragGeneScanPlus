@@ -2,6 +2,8 @@
 #include "util_lib.h"
 #include "fasta.h"
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 unsigned int ids; // thread id
 unsigned int threadnum = 1;
@@ -76,7 +78,10 @@ void setupProgram(int argc, char** argv){
     switch (c){
       case 's':
         strcpy(seq_file, optarg);
-        if (access(seq_file, F_OK)==-1){
+
+        if(strcmp(seq_file, "stdin") >= 0){
+          break;
+        } else if (access(seq_file, F_OK)==-1){
           fprintf(stderr, "ERROR: Sequence file [%s] does not exist\n", seq_file);
           print_usage();
           exit(EXIT_FAILURE);
@@ -312,6 +317,15 @@ void destroySemaphores(){
     sprintf(name, "/sema_w%d", j);
     sem_unlink(name);
   }
+
+#elif __linux
+  sem_destroy(&work_sema);
+  sem_destroy(&sema_Q);
+  sem_destroy(&sema_R);
+  sem_destroy(&sema_r);
+  sem_destroy(&sema_w);
+  sem_destroy(&stop_sema);
+  sem_destroy(&counter_sema);
 #endif
 
 }
@@ -379,6 +393,11 @@ void conductWork(){
     while(temp) {
       sem_wait(sema_R);
       stopped_at_fpos = read_seq_into_buffer(fp,  temp->td, temp->buffer);
+
+      if(stopped_at_fpos == 0){
+        num_reads_flag =1;
+      }
+
       sem_post(sema_R);
 
       sem_post(temp->td->sema_r);
@@ -542,7 +561,7 @@ void init_thread_data(thread_data* td){
   td->output_buffer = (char ***)malloc(sizeof(char**) * 2);    
   td->aa_buffer = (char ***)malloc(sizeof(char**) * 2);    
   td->dna_buffer = (char ***)malloc(sizeof(char**) * 2);    
-  td->acceptable_buffer = (unsigned int **) malloc(sizeof(unsigned int*) * 2);    
+  //td->acceptable_buffer = (unsigned int **) malloc(sizeof(unsigned int*) * 2);    
 
   td->dna	= malloc(sizeof(char) * 1500);
   memset(td->dna, 0, sizeof(char) * 1500);
@@ -567,7 +586,7 @@ void init_thread_data(thread_data* td){
     td->output_buffer[i]	= (char **) malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
     td->aa_buffer[i]	=   (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
     td->dna_buffer[i]	= (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
-    td->acceptable_buffer[i] = (unsigned int *)malloc(sizeof(unsigned int) * MAX_SEQS_PER_BUFFER);
+    //td->acceptable_buffer[i] = (unsigned int *)malloc(sizeof(unsigned int) * MAX_SEQS_PER_BUFFER);
 
     int j;
     for(j=0;j<MAX_SEQS_PER_BUFFER;j++){
@@ -589,7 +608,15 @@ void init_thread_data(thread_data* td){
 void* writer_func(void* args) {
 
   int j;
-  FILE* aa_outfile_fp = fopen(aa_file, "a");
+  //FILE* aa_outfile_fp = fopen(aa_file, "a");
+  FILE* aa_outfile_fp;
+
+  if(strcmp(out_file, "stdout") >= 0){
+    aa_outfile_fp = stdout;
+  } else {
+    aa_outfile_fp = fopen(aa_file, "a");
+  }
+
   if(!aa_outfile_fp) {
     printf("ERROR: Could not open aa output file %s for writing!\n", aa_file);
     exit(0);
@@ -656,6 +683,8 @@ void* writer_func(void* args) {
       temp = temp->next;
     }
 
+    //!!
+    //printf("%d\t%d\t%d\t\n", num_reads_flag, writer_counter, read_counter);
     if(num_reads_flag == 1 && writer_counter ==  read_counter)   {
       sem_post(stop_sema);
       break;
@@ -690,7 +719,7 @@ void* thread_func(void *_thread_datas) {
             td->dna, td->dna1, td->dna_f, td->dna_f1, td->protein,
             td->insert, td->c_delete, td->temp_str);
 
-        td->acceptable_buffer[b][i] = 1;
+        //td->acceptable_buffer[b][i] = 1;
 
         sem_wait(work_sema);
         work_counter++;

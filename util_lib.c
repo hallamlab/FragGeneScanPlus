@@ -387,8 +387,10 @@ void get_protein(char *dna, char *protein,  int strand){
 
 void print_usage(){
 
-    printf("%s", "USAGE: ./FragGeneScan.pl -s [seq_file_name] -m [max_mem_use] -o [output_file_name] -w [1 or 0] -t [train_file_name] (-p [thread_num]) -e [1 or 0] -d [1 or 0] \n\n");
-		printf("%s", "INFO: FragGeneScan will only output the amino acid files by default. To obtain the meta information set -e 1 and for the DNA files set -d 1\n\n");
+    printf("%s", "USAGE: ./FGS+ -s [seq_file_name] -m [max_mem_use] -o [output_file_name] -w [1 or 0] -t [train_file_name] -p [thread_num] -e [1 or 0] -d [1 or 0] \n");
+    printf("%s", "EXAMPLE USAGE: ./FGS+ -s example/NC_000913-454.fna -o output -w 0 -t 454_5 -p 16 \n");
+    printf("%s", "MINIMAL USAGE: ./FGS+ -s [seq_file_name] -o [output_file_name] -w [1 or 0] -t [train_file_name] \n");
+		printf("%s", "INFO: FragGeneScanPlus will only output the amino acid files by default. To obtain the meta information set -e 1 and for the DNA files set -d 1\n\n");
     printf("%s", "       Mandatory parameters\n");
     printf("%s", "       -s [seq_file_name]:    sequence file name including the full path\n");
     printf("%s", "       -o [output_file_name]: output file name including the full path\n");
@@ -407,7 +409,7 @@ void print_usage(){
     printf("%s", "                           [illumina_10] for Illumina sequencing reads with about 1% error rate\n\n");
     printf("%s", "       Optional flags\n");
     printf("%s", "       -r [train_file_dir]:  full path of directory containing the model files. If not specified \"train/\" assumed\n");
-    printf("%s", "       -p [thread_num]     The number of threads used by FragGeneScan; default is 1 thread.\n");
+    printf("%s", "       -p [thread_num]     The number of threads used by FragGeneScanPlus; default is 1 thread.\n");
     printf("%s", "       -e [1 or 0]         Output metadata for sequences.\n");
     printf("%s", "       -d [1 or 0]         Output DNA file.\n");
     printf("%s", "       -m [max_mem_usage]  Maximum amount of memory to be used by the application, in megabytes, default 1024 for 1GB\n");

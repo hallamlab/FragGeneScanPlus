@@ -184,8 +184,7 @@ typedef struct thread_data
     int* c_delete;
     char* temp_str;
 
-    unsigned int** acceptable_buffer;
-
+    //unsigned int** acceptable_buffer;
 
     SEM_T sema_r;
     SEM_T sema_w;
