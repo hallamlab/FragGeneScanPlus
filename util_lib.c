@@ -393,7 +393,9 @@ void print_usage(){
 		printf("%s", "INFO: FragGeneScanPlus will only output the amino acid files by default. To obtain the meta information set -e 1 and for the DNA files set -d 1\n\n");
     printf("%s", "       Mandatory parameters\n");
     printf("%s", "       -s [seq_file_name]:    sequence file name including the full path\n");
+    printf("%s", "                              for standard input specify as stdin\n");
     printf("%s", "       -o [output_file_name]: output file name including the full path\n");
+    printf("%s", "                              for standard output specify as stdout\n");
     printf("%s", "       -w [1 or 0]:           1 if the sequence file has complete genomic sequences\n");
     printf("%s", "       		                    0 if the sequence file has short sequence reads\n");
     printf("%s", "       -t [train_file_name]:  file name that contains model parameters; this file should be in the -r directory\n");
