@@ -1,6 +1,9 @@
 #include "util_lib.h"
 
-void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *dna_buffer, char *sequence_head, int whole_genome, int format, int len_seq, char* dna_ptr, char* dna1_ptr, char* dna_f_ptr, char* dna_f1_ptr, char* protein_ptr, int* insert_ptr, int* c_delete_ptr, char* temp_str_ptr){
+void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, 
+              char *dna_buffer, char *sequence_head, int whole_genome, int format, 
+              int len_seq, char* dna, char* dna1, char* dna_f, char* dna_f1, 
+              char* protein, int* insert, int* c_delete, char* temp_str_ptr){
 
     int *vpath;                          // optimal path after backtracking 
     int **path;                          // viterbi path array 
@@ -17,12 +20,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
     double final_score;
 
     int codon_start = 0;
-    // Changed the sizes of these, put in a disclaimer that it wont run for > 1000 base pairs
-    char* dna 		= dna_ptr;
-    char* dna1 		= dna1_ptr;
-    char* dna_f 	= dna_f_ptr;
-    char* dna_f1  = dna_f1_ptr;
-    char* protein = protein_ptr;
     int dna_id = 0;
     int dna_f_id = 0;
     int out_nt;
@@ -31,8 +28,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
     int prev_match;
     int start_orf;
     int frame;
-    int* insert = insert_ptr;
-    int* c_delete = c_delete_ptr;
     int insert_id, delete_id;
     int temp_i[6]   = {0,0,0,0,0,0};
     int temp_i_1[6] = {1,1,1,1,1,1};
@@ -794,13 +789,18 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *
                 (vpath[t]==M1_STATE || vpath[t]==M4_STATE ||
                  vpath[t]==M1_STATE_1 || vpath[t]==M4_STATE_1)){
 
+              //!! A better approach would be to modularize this entire program so that we never
+              //!! have memory access we don't need.
+
+              //!! If we just have a null termination in the right place then we can 
+              //!! overwrite what is in the buffer and avoid a memory memset operation.
                memset(dna, 0, STRINGLEN);
-               memset(dna1, 0, STRINGLEN);
-               memset(dna_f, 0, STRINGLEN);
-               memset(dna_f1, 0, STRINGLEN);
+               memset(dna1, 0, STRINGLEN);//
+               memset(dna_f, 0, STRINGLEN);//
+               memset(dna_f1, 0, STRINGLEN);//
                memset(protein, 0, STRINGLEN);
-               memset(insert, 0, STRINGLEN);
-               memset(c_delete, 0, STRINGLEN);
+               memset(insert, 0, STRINGLEN);//
+               memset(c_delete, 0, STRINGLEN);//
 
             insert_id = 0;
             delete_id = 0;
