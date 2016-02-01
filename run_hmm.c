@@ -561,23 +561,22 @@ void init_thread_data(thread_data* td){
   td->output_buffer = (char ***)malloc(sizeof(char**) * 2);    
   td->aa_buffer = (char ***)malloc(sizeof(char**) * 2);    
   td->dna_buffer = (char ***)malloc(sizeof(char**) * 2);    
-  //td->acceptable_buffer = (unsigned int **) malloc(sizeof(unsigned int*) * 2);    
 
-  td->dna	= malloc(sizeof(char) * 1500);
-  memset(td->dna, 0, sizeof(char) * 1500);
-  td->dna1 = malloc(sizeof(char) * 1500);
-  memset(td->dna1, 0, sizeof(char)*1500);
-  td->dna_f = malloc(sizeof(char) * 1500);
-  memset(td->dna_f, 0, sizeof(char)*1500);
-  td->dna_f1 = malloc(sizeof(char) * 1500);
-  memset(td->dna_f1, 0, sizeof(char)*1500);
-  td->protein = malloc(sizeof(char) * 500);
-  memset(td->protein, 0, sizeof(char)*500);
-  td->temp_str = malloc(sizeof(char) * 512);
-  memset(td->temp_str, 0, sizeof(char)*512);
+  td->dna	= malloc(sizeof(char) * STRINGLEN);
+  memset(td->dna, 0, sizeof(char) * STRINGLEN);
+  td->dna1 = malloc(sizeof(char) * STRINGLEN);
+  memset(td->dna1, 0, sizeof(char) * STRINGLEN);
+  td->dna_f = malloc(sizeof(char) * STRINGLEN);
+  memset(td->dna_f, 0, sizeof(char) * STRINGLEN);
+  td->dna_f1 = malloc(sizeof(char) * STRINGLEN);
+  memset(td->dna_f1, 0, sizeof(char) * STRINGLEN);
+  td->protein = malloc(sizeof(char) * STRINGLEN);
+  memset(td->protein, 0, sizeof(char) * STRINGLEN);
+  td->temp_str = malloc(sizeof(char) * STRINGLEN);
+  memset(td->temp_str, 0, sizeof(char) * STRINGLEN);
 
-  td->insert = malloc(sizeof(int) * 100);
-  td->c_delete = malloc(sizeof(int) * 100);
+  td->insert = malloc(sizeof(int) * STRINGLEN);
+  td->c_delete = malloc(sizeof(int) * STRINGLEN);
 
   int i;
   for (i=0;i<2;i++) {
@@ -586,7 +585,6 @@ void init_thread_data(thread_data* td){
     td->output_buffer[i]	= (char **) malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
     td->aa_buffer[i]	=   (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
     td->dna_buffer[i]	= (char **)malloc(sizeof(char*) * MAX_SEQS_PER_BUFFER);
-    //td->acceptable_buffer[i] = (unsigned int *)malloc(sizeof(unsigned int) * MAX_SEQS_PER_BUFFER);
 
     int j;
     for(j=0;j<MAX_SEQS_PER_BUFFER;j++){

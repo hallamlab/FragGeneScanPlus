@@ -16,11 +16,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "fasta.h"
+#include "fasta.h" // STRINGLEN 
 
 #define DONE_Q 0
 #define EMPTY_Q 1
-#define STRINGLEN 512
 #define max_dbl 10000000000.0
 
 #define LOG_53 -0.63487827243

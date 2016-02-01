@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 
-#define FASTA_MAXLINE 512	/* Requires FASTA file lines to be <512 characters */
+#define STRINGLEN 10000
 
 typedef struct fastafile_s {
   FILE *fp;
-  char  buffer[FASTA_MAXLINE];
+  char  buffer[STRINGLEN];
 } FASTAFILE;
 
 extern FASTAFILE *OpenFASTA(char *seqfile);

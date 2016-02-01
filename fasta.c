@@ -10,8 +10,6 @@
 #include <ctype.h>
 
 #include "fasta.h"
-#define MAXSEQLEN  4000
-
 
 /* Function: OpenFASTA(), ReadFASTA(), CloseFASTA().
  * Date:     SRE, Sun Sep  8 06:39:26 2002 [AA2721, transatlantic]
@@ -77,7 +75,7 @@
  *           or detect that it's an invalid format and fail cleanly.
  *           
  *           Lines are read in from the file using ANSI C's fgets(). fgets()
- *           requires a maximum buffer length (here, FASTA_MAXLINE, which is
+ *           requires a maximum buffer length (here, STRINGLEN, which is
  *           defined as 512 in bio5495.h). Some FASTA files have very long
  *           description lines, however; notably the NCBI NR database. Static
  *           limitations on things like line or sequence lengths should be
@@ -111,7 +109,7 @@ FASTAFILE * OpenFASTA(char *seqfile) {
     if (ffp->fp == NULL) { 
       free(ffp); return NULL; 
     } 
-    if ((fgets(ffp->buffer, FASTA_MAXLINE, ffp->fp)) == NULL) { 
+    if ((fgets(ffp->buffer, STRINGLEN, ffp->fp)) == NULL) { 
       free(ffp); return NULL; 
     }
   }
@@ -149,7 +147,7 @@ ReadFASTA(FASTAFILE *ffp, char **ret_seq, char **ret_name, int *ret_L)
     seq = malloc(sizeof(char) * 1024);     /* allocate seq in blocks of 128 residues */
   nalloc = 128;
   n = 0;
-  while (fgets(ffp->buffer, FASTA_MAXLINE, ffp->fp))
+  while (fgets(ffp->buffer, STRINGLEN, ffp->fp))
   {
     if (ffp->buffer[0] == '>') break;	/* a-ha, we've reached the next descline */
 
