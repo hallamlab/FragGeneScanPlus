@@ -10,17 +10,18 @@ To install FragGeneScanPlus, please follow the steps below:
 	make clean
 	make
 
-If the Operation System is a Mac then running make will compile fine. If the Operating System is of a Linux distribution, remove
-the -DMAC_SEM portion from the Makefile and then run make. 
-
 
 Running the program
 ====================
-1.  To run FragGeneScanPLus, 
+1.  To run FragGeneScanPlus, 
 
 USAGE: ./FGS+ -s [seq_file_name] -m [max_mem_use] -o [output_file_name] -w [1 or 0] -t [train_file_name] -p [thread_num] -e [1 or 0] -d [1 or 0] 
 
-INFO: FragGeneScan will only output the amino acid files by default. To obtain the gene coordinate information set -e to 1 and for the DNA files set -d to 1
+EXAMPLE USAGE: ./FGS+ -s example/NC_000913-454.fna -o output -w 0 -t 454_5 -p 16
+
+MINIMAL USAGE: ./FGS+ -s [seq_file_name] -o [output_file_name] -w [1 or 0] -t [train_file_name] 
+
+INFO: FragGeneScanPlus will only output the amino acid files by default. To obtain the gene coordinate information set -e to 1 and for the DNA files set -d to 1
 
        Mandatory parameters
        -s [seq_file_name]:    sequence file name including the full path
@@ -35,6 +36,7 @@ INFO: FragGeneScan will only output the amino acid files by default. To obtain t
                            [454_5] for 454 pyrosequencing reads with about 0.5% error rate
                            [454_10] for 454 pyrosequencing reads with about 1% error rate
                            [454_30] for 454 pyrosequencing reads with about 3% error rate
+                           [illumina_1] for Illumina sequencing reads with about 0.1% error rate
                            [illumina_5] for Illumina sequencing reads with about 0.5% error rate
                            [illumina_10] for Illumina sequencing reads with about 1% error rate
 
