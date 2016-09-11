@@ -606,7 +606,6 @@ void init_thread_data(thread_data* td){
 void* writer_func(void* args) {
 
   int j;
-  //FILE* aa_outfile_fp = fopen(aa_file, "a");
   FILE* aa_outfile_fp;
 
   if(strcmp(out_file, "stdout") >= 0){
@@ -681,8 +680,6 @@ void* writer_func(void* args) {
       temp = temp->next;
     }
 
-    //!!
-    //printf("%d\t%d\t%d\t\n", num_reads_flag, writer_counter, read_counter);
     if(num_reads_flag == 1 && writer_counter ==  read_counter)   {
       sem_post(stop_sema);
       break;
@@ -716,8 +713,6 @@ void* thread_func(void *_thread_datas) {
             td->input_head_buffer[b][i], td->wholegenome, td->format, stringlength,
             td->dna, td->dna1, td->dna_f, td->dna_f1, td->protein,
             td->insert, td->c_delete, td->temp_str);
-
-        //td->acceptable_buffer[b][i] = 1;
 
         sem_wait(work_sema);
         work_counter++;

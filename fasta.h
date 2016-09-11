@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#define STRINGLEN 10000
+#define STRINGLEN 1000000
 
 typedef struct fastafile_s {
   FILE *fp;

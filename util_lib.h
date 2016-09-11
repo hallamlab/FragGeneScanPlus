@@ -39,4 +39,6 @@ QUEUE* deq(unsigned int which);
 
 void cutnpaste_q(QUEUE** dest, unsigned int which); 
 
+void stopMemset(char* ptr, int length);
+
 #endif

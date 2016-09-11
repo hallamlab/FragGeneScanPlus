@@ -794,13 +794,13 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer,
 
               //!! If we just have a null termination in the right place then we can 
               //!! overwrite what is in the buffer and avoid a memory memset operation.
-               memset(dna, 0, STRINGLEN);
-               memset(dna1, 0, STRINGLEN);//
-               memset(dna_f, 0, STRINGLEN);//
-               memset(dna_f1, 0, STRINGLEN);//
-               memset(protein, 0, STRINGLEN);
-               memset(insert, 0, STRINGLEN);//
-               memset(c_delete, 0, STRINGLEN);//
+               stopMemset(dna, STRINGLEN);
+               stopMemset(dna1, STRINGLEN);//
+               stopMemset(dna_f, STRINGLEN);//
+               stopMemset(dna_f1, STRINGLEN);//
+               stopMemset(protein, STRINGLEN);
+               stopMemset(insert, STRINGLEN);//
+               stopMemset(c_delete, STRINGLEN);//
 
             insert_id = 0;
             delete_id = 0;

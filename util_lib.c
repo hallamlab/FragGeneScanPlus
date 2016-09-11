@@ -417,3 +417,12 @@ void print_usage(){
     printf("%s", "       -m [max_mem_usage]  Maximum amount of memory to be used by the application, in megabytes, default 1024 for 1GB\n");
 
 }
+
+void stopMemset(char* ptr, int length) {
+	for(int i=0; i<length; i++){
+		if(ptr[i] == '\0'){
+			return;
+		}
+		ptr[i] = '\0';
+	}
+}
