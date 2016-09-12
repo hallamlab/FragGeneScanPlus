@@ -419,7 +419,8 @@ void print_usage(){
 }
 
 void stopMemset(char* ptr, int length) {
-	for(int i=0; i<length; i++){
+	int i;
+	for(i=0; i<length; i++){
 		if(ptr[i] == '\0'){
 			return;
 		}
