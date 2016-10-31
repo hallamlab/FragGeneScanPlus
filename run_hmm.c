@@ -189,40 +189,40 @@ void setupProgram(int argc, char** argv){
 
   /* check whether the specified files exist */
   if (access(mstate_file, F_OK)==-1){
-    fprintf(stderr, "Forward prob. file [%s] does not exist\n", mstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: Forward prob. file [%s] does not exist\n", mstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(rstate_file, F_OK)==-1){
-    fprintf(stderr, "Backward prob. file [%s] does not exist\n", rstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: Backward prob. file [%s] does not exist\n", rstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(nstate_file, F_OK)==-1){
-    fprintf(stderr, "noncoding prob. file [%s] does not exist\n", nstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: noncoding prob. file [%s] does not exist\n", nstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(sstate_file, F_OK)==-1){
-    fprintf(stderr, "start prob. file [%s] does not exist\n", sstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: start prob. file [%s] does not exist\n", sstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(pstate_file, F_OK)==-1){
-    fprintf(stderr, "stop prob. file [%s] does not exist\n", pstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: stop prob. file [%s] does not exist\n", pstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(s1state_file, F_OK)==-1){
-    fprintf(stderr, "start1 prob. file [%s] does not exist\n", s1state_file);
-    exit(1);
+    fprintf(stderr, "ERROR: start1 prob. file [%s] does not exist\n", s1state_file);
+    exit(EXIT_FAILURE);
   }
   if (access(p1state_file, F_OK)==-1){
-    fprintf(stderr, "stop1 prob. file [%s] does not exist\n", p1state_file);
-    exit(1);
+    fprintf(stderr, "ERROR: stop1 prob. file [%s] does not exist\n", p1state_file);
+    exit(EXIT_FAILURE);
   }
   if (access(dstate_file, F_OK)==-1){
-    fprintf(stderr, "pwm dist. file [%s] does not exist\n", dstate_file);
-    exit(1);
+    fprintf(stderr, "ERROR: pwm dist. file [%s] does not exist\n", dstate_file);
+    exit(EXIT_FAILURE);
   }
   if (access(hmm_file, F_OK)==-1){
-    fprintf(stderr, "hmm file [%s] does not exist\n", hmm_file);
-    exit(1);
+    fprintf(stderr, "ERROR: hmm file [%s] does not exist\n", hmm_file);
+    exit(EXIT_FAILURE);
   }
 
   /* check for mem limit, allocate buffer */
@@ -246,19 +246,19 @@ void initializeSemaphores(){
 #ifdef __APPLE__
   sem_unlink("/work_sema");
   if ( ( work_sema = sem_open("/work_sema", O_CREAT, 0644, 1)) == SEM_FAILED ) {
-    perror("sem_open");
+    perror("ERROR: sem_open");
     exit(EXIT_FAILURE);
   }
 
   sem_unlink("/sema_Q");
   if (( sema_Q = sem_open("/sema_Q", O_CREAT, 0644, 1))== SEM_FAILED ) {
-    perror("sem_open");
+    perror("ERROR: sem_open");
     exit(EXIT_FAILURE);
   }
 
   sem_unlink("/sema_R");
   if (( sema_R = sem_open("/sema_R", O_CREAT, 0644, 1)) == SEM_FAILED ) {
-    perror("sem_open");
+    perror("ERROR: sem_open");
     exit(EXIT_FAILURE);
   }
 
@@ -276,13 +276,13 @@ void initializeSemaphores(){
 
   sem_unlink("/stop_sema");
   if (( stop_sema = sem_open("/stop_sema", O_CREAT, 0644, 0)) == SEM_FAILED ) {
-    perror("sem_open");
+    perror("ERROR: sem_open");
     exit(EXIT_FAILURE);
   }
 
   sem_unlink("/COUNTER_SEMA");
   if (( counter_sema = sem_open("/COUNTER_SEMA", O_CREAT, 0644, 1)) == SEM_FAILED ) {
-    perror("sem_open");
+    perror("ERROR: sem_open");
     exit(EXIT_FAILURE);
   }
 
@@ -356,7 +356,7 @@ void initializeThreads(){
 
   if (!fp) {
     printf("ERROR! Could not open seq_file %s for reading...!\n", seq_file);
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   if (verbose)
@@ -616,7 +616,7 @@ void* writer_func(void* args) {
 
   if(!aa_outfile_fp) {
     printf("ERROR: Could not open aa output file %s for writing!\n", aa_file);
-    exit(0);
+    exit(EXIT_FAILURE);
   } 
 
   while(1) {
@@ -640,7 +640,7 @@ void* writer_func(void* args) {
         outfile_fp = fopen(out_file, "a");
         if(!outfile_fp) {
           printf("ERROR: Could not open output file %s for writing!\n", out_file);
-          exit(0);
+          exit(EXIT_FAILURE);
         } 
       }
 
@@ -648,7 +648,7 @@ void* writer_func(void* args) {
         dna_outfile_fp = fopen(dna_file, "a");
         if (!dna_outfile_fp) {
           printf("ERROR: Could not open dna output file %s for writing!\n", dna_file);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
 
