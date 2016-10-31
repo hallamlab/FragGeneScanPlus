@@ -789,11 +789,6 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer,
                 (vpath[t]==M1_STATE || vpath[t]==M4_STATE ||
                  vpath[t]==M1_STATE_1 || vpath[t]==M4_STATE_1)){
 
-              //!! A better approach would be to modularize this entire program so that we never
-              //!! have memory access we don't need.
-
-              //!! If we just have a null termination in the right place then we can 
-              //!! overwrite what is in the buffer and avoid a memory memset operation.
                stopMemset(dna, STRINGLEN);
                stopMemset(dna1, STRINGLEN);//
                stopMemset(dna_f, STRINGLEN);//

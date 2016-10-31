@@ -2,6 +2,7 @@
 out*
 *.faa
 *.txt
+*.swp
 FGS+
 
 # OSX files
