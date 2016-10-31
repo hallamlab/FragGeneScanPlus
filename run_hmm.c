@@ -645,6 +645,8 @@ void writeAminoAcids(FILE* aa_outfile_fp, thread_data* td, unsigned int buffer) 
             }
             fprintf(aa_outfile_fp, ">%s", td->aa_buffer[buffer][j]);
         }
+
+        //!! Why are we clearing dna and output buff?
         stopMemset(td->output_buffer[buffer][j], STRINGLEN);
         stopMemset(td->aa_buffer[buffer][j], STRINGLEN);
         stopMemset(td->dna_buffer[buffer][j], STRINGLEN);
@@ -670,13 +672,13 @@ FILE* openFilePointers() {
 
 void closeFilePointers( FILE** aa_outfile_fp, FILE** outfile_fp, FILE** dna_outfile_fp ) {
 
-    fclose(aa_outfile_fp);
-    if (output_meta) fclose(outfile_fp);
-    if (output_dna) fclose(dna_outfile_fp);
+    fclose(*aa_outfile_fp);
+    if (output_meta) fclose(*outfile_fp);
+    if (output_dna) fclose(*dna_outfile_fp);
 
-    aa_outfile_fp = NULL;
-    outfile_fp = NULL;
-    dna_outfile_fp = NULL;
+    *aa_outfile_fp = NULL;
+    *outfile_fp = NULL;
+    *dna_outfile_fp = NULL;
 }
 
 void* writer_func(void* args) {
@@ -719,11 +721,33 @@ void* writer_func(void* args) {
     closeFilePointers(&aa_outfile_fp, &outfile_fp, &dna_outfile_fp );
 }
 
+void runViterbiOnBuffers(thread_data *td, unsigned int b) {
+
+    unsigned int i;
+    for (i=0; i < td->input_num_sequences[b]; i++) {
+        unsigned int stringlength = strlen(td->input_buffer[b][i]);
+        get_prob_from_cg(td->hmm, &train, td->input_buffer[b][i], stringlength);
+
+        if (td->input_buffer[b][i] && td->input_head_buffer[b][i] ) {
+
+            viterbi(td->hmm, td->input_buffer[b][i], td->output_buffer[b][i],
+                    td->aa_buffer[b][i], td->dna_buffer[b][i],
+                    td->input_head_buffer[b][i], td->wholegenome, td->format, stringlength,
+                    td->dna, td->dna1, td->dna_f, td->dna_f1, td->protein,
+                    td->insert, td->c_delete, td->temp_str);
+
+            sem_wait(work_sema);
+            work_counter++;
+            sem_post(work_sema);
+        }
+    }
+
+}
+
 void* thread_func(void *_thread_datas) {
 
     thread_data *td = (thread_data*)_thread_datas;
     unsigned int b = 0;
-    unsigned int i;
 
     while(1) {
         sem_wait(td->sema_r);
@@ -733,25 +757,7 @@ void* thread_func(void *_thread_datas) {
         viterbi_counter +=  td->input_num_sequences[b];
         sem_post(counter_sema);
 
-        for (i=0; i < td->input_num_sequences[b]; i++) {
-            unsigned int stringlength = strlen(td->input_buffer[b][i]);
-            get_prob_from_cg(td->hmm, &train, td->input_buffer[b][i], stringlength);
-
-            if (td->input_buffer[b][i] && td->input_head_buffer[b][i] ) {
-                memset(td->aa_buffer[b][i], 0, STRINGLEN );
-
-                viterbi(td->hmm, td->input_buffer[b][i], td->output_buffer[b][i],
-                        td->aa_buffer[b][i], td->dna_buffer[b][i],
-                        td->input_head_buffer[b][i], td->wholegenome, td->format, stringlength,
-                        td->dna, td->dna1, td->dna_f, td->dna_f1, td->protein,
-                        td->insert, td->c_delete, td->temp_str);
-
-                sem_wait(work_sema);
-                work_counter++;
-                sem_post(work_sema);
-            }
-
-        }
+        runViterbiOnBuffers(td, b);
         td->output_num_sequences[b] = td->input_num_sequences[b];
 
         if (verbose) {
@@ -769,5 +775,6 @@ void* thread_func(void *_thread_datas) {
 
         b = (b + 1) % 2;
     }
+
     return (void*) 0;
 }
