@@ -33,11 +33,11 @@ QUEUE* q_done_head;
 QUEUE* q_done_tail;
 
 
-void printq(unsigned int which); 
-void enq(thread_data* td, unsigned int buffer, unsigned int which); 
-QUEUE* deq(unsigned int which);  
+void printq(unsigned int which);
+void enq(thread_data* td, unsigned int buffer, unsigned int which);
+QUEUE* deq(unsigned int which);
 
-void cutnpaste_q(QUEUE** dest, unsigned int which); 
+void cutnpaste_q(QUEUE** dest, unsigned int which);
 
 void stopMemset(char* ptr, int length);
 

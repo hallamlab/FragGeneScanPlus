@@ -12,8 +12,8 @@
 #define STRINGLEN 1000000
 
 typedef struct fastafile_s {
-  FILE *fp;
-  char  buffer[STRINGLEN];
+    FILE *fp;
+    char  buffer[STRINGLEN];
 } FASTAFILE;
 
 extern FASTAFILE *OpenFASTA(char *seqfile);

@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -88,7 +88,7 @@ char hmm_file[STRINGLEN];
 char aa_file[STRINGLEN];
 char seq_file[STRINGLEN];
 char out_file[STRINGLEN];
-char dna_file[STRINGLEN]; 
+char dna_file[STRINGLEN];
 char train_file[STRINGLEN];
 char mstate_file[STRINGLEN];
 char rstate_file[STRINGLEN];
@@ -102,11 +102,11 @@ char train_dir[STRINGLEN];
 
 // semaphores
 #ifdef __APPLE__
-  typedef sem_t* SEM_T;
+typedef sem_t* SEM_T;
 #elif __linux
-  typedef sem_t SEM_T;
-  #define sem_wait(x) sem_wait(&x)
-  #define sem_post(x) sem_post(&x)
+typedef sem_t SEM_T;
+#define sem_wait(x) sem_wait(&x)
+#define sem_post(x) sem_post(&x)
 #endif
 
 SEM_T sema_Q;
@@ -156,8 +156,7 @@ typedef struct {
 
 } TRAIN;
 
-typedef struct thread_data
-{
+typedef struct thread_data {
     unsigned int wholegenome;
     unsigned int format;
     HMM *hmm;
@@ -166,7 +165,7 @@ typedef struct thread_data
     unsigned int *input_num_sequences;
     unsigned int  id;
 
-    // all buffers allocated by master 
+    // all buffers allocated by master
     char*** input_buffer;
     char*** input_head_buffer;
     char*** output_buffer;
@@ -174,9 +173,9 @@ typedef struct thread_data
     char*** dna_buffer;
 
     // new stuff
-    char* dna; 
-    char* dna1; 
-    char* dna_f; 
+    char* dna;
+    char* dna1;
+    char* dna_f;
     char* dna_f1;
     char* protein;
     int* insert;
@@ -200,12 +199,12 @@ int read_seq_into_buffer(FASTAFILE* fp, thread_data* thread_data, unsigned int b
 void* writer_func(void* args);
 
 void get_prob_from_cg(HMM *hmm, TRAIN *train, char *O, int len_seq);
-void get_train_from_file(char *filename, HMM *hmm_ptr, char *mfilename, char *mfilename1, char *nfilename, 
-        char *sfilename,char *pfilename,char *s1filename,char *p1filename, char *dfilename, TRAIN *train_ptr);
+void get_train_from_file(char *filename, HMM *hmm_ptr, char *mfilename, char *mfilename1, char *nfilename,
+                         char *sfilename,char *pfilename,char *s1filename,char *p1filename, char *dfilename, TRAIN *train_ptr);
 void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer, char *dna_buffer,
-        char *sequence_head, int whole_genome, int format, int len_seq,
-        char* dna_ptr, char* dna1_ptr, char* dna_f_ptr, char* dna_f1_ptr, char* protein_ptr,
-        int* insert_ptr, int* c_delete_ptr, char* temp_str_ptr);
+             char *sequence_head, int whole_genome, int format, int len_seq,
+             char* dna_ptr, char* dna1_ptr, char* dna_f_ptr, char* dna_f1_ptr, char* protein_ptr,
+             int* insert_ptr, int* c_delete_ptr, char* temp_str_ptr);
 
 void free_hmm(HMM *hmm);
 void get_protein(char *dna, char *protein, int strand);
@@ -215,9 +214,9 @@ void get_corrected_dna(char *dna, char *dna_f);
 void* thread_func(void *thread_datas);
 void print_usage();
 void free_thread_data(thread_data* td);
-void print_outputs(int codon_start, int start_t, int end_t, int frame, char* output_buffer, char* aa_buffer, 
-        char* dna_buffer, char* sequence_head_short, char* dna, char* dna1, char* dna_f, char* dna_f1, 
-        char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple);
+void print_outputs(int codon_start, int start_t, int end_t, int frame, char* output_buffer, char* aa_buffer,
+                   char* dna_buffer, char* sequence_head_short, char* dna, char* dna1, char* dna_f, char* dna_f1,
+                   char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple);
 
 // helper functions to cleanup the main function
 void conductWork();
