@@ -651,11 +651,9 @@ void writeAminoAcids(FILE* aa_outfile_fp, thread_data* td, unsigned int buffer) 
     }
 }
 
-void* writer_func(void* args) {
+FILE* openFilePointers() {
 
-    int j;
     FILE* aa_outfile_fp;
-
     if(strcmp(out_file, "stdout") >= 0) {
         aa_outfile_fp = stdout;
     } else {
@@ -667,8 +665,27 @@ void* writer_func(void* args) {
         exit(EXIT_FAILURE);
     }
 
+    return aa_outfile_fp;
+}
+
+void closeFilePointers( FILE** aa_outfile_fp, FILE** outfile_fp, FILE** dna_outfile_fp ) {
+
+    fclose(aa_outfile_fp);
+    if (output_meta) fclose(outfile_fp);
+    if (output_dna) fclose(dna_outfile_fp);
+
+    aa_outfile_fp = NULL;
+    outfile_fp = NULL;
+    dna_outfile_fp = NULL;
+}
+
+void* writer_func(void* args) {
+
+    int j;
+    FILE* aa_outfile_fp = openFilePointers();
+
     while(1) {
-        // write out results
+
         sem_wait(sema_w);
 
         QUEUE* temp;
@@ -699,9 +716,7 @@ void* writer_func(void* args) {
 
     }
 
-    fclose(aa_outfile_fp);
-    if (output_meta) fclose(outfile_fp);
-    if (output_dna) fclose(dna_outfile_fp);
+    closeFilePointers(&aa_outfile_fp, &outfile_fp, &dna_outfile_fp );
 }
 
 void* thread_func(void *_thread_datas) {
