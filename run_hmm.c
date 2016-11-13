@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "run_hmm.h"
+
 unsigned int ids; // thread id
 unsigned int threadnum = 1;
 unsigned int format;
