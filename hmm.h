@@ -196,7 +196,6 @@ TRAIN train;
 void init_thread_data(thread_data* td);
 off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsigned int buf);
 int read_seq_into_buffer(FASTAFILE* fp, thread_data* thread_data, unsigned int buf);
-void* writer_func(void* args);
 
 void get_prob_from_cg(HMM *hmm, TRAIN *train, char *O, int len_seq);
 void get_train_from_file(char *filename, HMM *hmm_ptr, char *mfilename, char *mfilename1, char *nfilename,
@@ -211,7 +210,6 @@ void get_protein(char *dna, char *protein, int strand);
 void get_rc_dna(char *dna, char *dna1);
 void get_rc_dna_indel(char* dna_f, char* dna_f1);
 void get_corrected_dna(char *dna, char *dna_f);
-void* thread_func(void *thread_datas);
 void print_usage();
 void free_thread_data(thread_data* td);
 void print_outputs(int codon_start, int start_t, int end_t, int frame, char* output_buffer, char* aa_buffer,

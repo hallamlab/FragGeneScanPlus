@@ -18,6 +18,8 @@ unsigned int MAX_BYTES_PER_BUFFER;
 unsigned int MAX_SEQS_PER_BUFFER;
 unsigned int num_reads_flag = 0;
 
+int max_mem = 0;
+
 pthread_t writer_thread;
 long long round_counter;
 off_t stopped_at_fpos; // tracks how far we've read in the input
@@ -42,14 +44,7 @@ char complete_sequence[STRINGLEN];
 
 FASTAFILE* fp;
 
-void setupProgram(int argc, char** argv) {
-
-    int max_mem = 0;
-    fp = 0;
-    // strncpy(train_dir, argv[0], strlen(argv[0])-4);
-    // Set default training directory
-    setTrainDirectory("train");
-
+void parseArguments(int argc, char **argv) {
     /* read command line argument */
     //!! This argument reading should all be encapsulated in a single function, this will make reading the code much easier, right now we have to always move around it.
     if (argc <= 8) {
@@ -135,8 +130,9 @@ void setupProgram(int argc, char** argv) {
             break;
         }
     }
+}
 
-
+void checkFiles() {
     /* check whether the specified files exist */
     if (access(mstate_file, F_OK)==-1) {
         fprintf(stderr, "ERROR: Forward prob. file [%s] does not exist\n", mstate_file);
@@ -174,7 +170,9 @@ void setupProgram(int argc, char** argv) {
         fprintf(stderr, "ERROR: hmm file [%s] does not exist\n", hmm_file);
         exit(EXIT_FAILURE);
     }
+}
 
+void setMemoryLimits() {
     /* check for mem limit, allocate buffer */
     if (max_mem <= 0) {
         printf("Max memory limit specified invalid, defaulting to 1024MB\n");
@@ -184,6 +182,9 @@ void setupProgram(int argc, char** argv) {
     // 5 stands for the number of buffers we are currently using per thread
     MAX_BYTES_PER_BUFFER = max_mem*100000/(5*2*threadnum);
     MAX_SEQS_PER_BUFFER = MAX_BYTES_PER_BUFFER/STRINGLEN;
+}
+
+void checkOutputFiles() {
 
     // remove them, if they already exist
     remove(aa_file);
@@ -320,7 +321,7 @@ void initializeThreads() {
         printf("DEBUG: Starting writer thread...\n");
     }
 
-    pthread_create(&writer_thread, 0, writer_func, 0);
+    pthread_create(&writer_thread, 0, writerThread, 0);
 
     fp = OpenFASTA(seq_file);
 
@@ -335,7 +336,7 @@ void initializeThreads() {
     int i,j;
     void *status;
     for(j=0; j<threadnum; j++)
-        pthread_create(&thread[j], 0, thread_func, (void *)(thread_datas+j));
+        pthread_create(&thread[j], 0, workerThread, (void *)(thread_datas+j));
 
     for(j=0; j<threadnum; j++) {
         for(i=0; i<2; i++) {
@@ -350,7 +351,7 @@ void initializeThreads() {
 
 }
 
-void conductWork() {
+void readerThread() {
     // master loop - while we haven't exhausted reading the file yet
     while (stopped_at_fpos!=0) {
         sem_wait(sema_r);
@@ -386,10 +387,17 @@ void conductWork() {
 
 int main (int argc, char **argv) {
 
-    // read in options and setup the necessary variables
-    setupProgram(argc, argv);
+    fp = 0;
+    setTrainDirectory("train");
 
-    // setup all of the semaphores
+    parseArguments(argc, argv);
+
+    checkFiles();
+
+    setMemoryLimits();
+
+    checkOutputFiles();
+
     initializeSemaphores();
 
     if (verbose)
@@ -402,7 +410,7 @@ int main (int argc, char **argv) {
     initializeThreads();
 
     // master loop - while we haven't exhausted reading the file yet
-    conductWork();
+    readerThread();
 
     // destroy the semaphores if we have a mac machine
     destroySemaphores();
@@ -636,7 +644,7 @@ void closeFilePointers( FILE** aa_outfile_fp, FILE** outfile_fp, FILE** dna_outf
     *dna_outfile_fp = NULL;
 }
 
-void* writer_func(void* args) {
+void* writerThread(void* args) {
 
     int j;
     FILE* aa_outfile_fp = openFilePointers();
@@ -699,7 +707,7 @@ void runViterbiOnBuffers(thread_data *td, unsigned int b) {
 
 }
 
-void* thread_func(void *_thread_datas) {
+void* workerThread(void *_thread_datas) {
 
     thread_data *td = (thread_data*)_thread_datas;
     unsigned int b = 0;
