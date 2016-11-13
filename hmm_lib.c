@@ -1136,95 +1136,54 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
                    int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple) {
 
     int i;
-    char tab[] = "\t";
 
+    if (codon_start != 1 || codon_start != -1)
+        return;
 
-
-
-    if (codon_start == 1) {
-
-        //sprintf(temp_str_ptr, "%d\t%d\t+\t%d\t%lf\t", start_t, end_t, frame, final_score);
+    if (codon_start == 1)
         sprintf(temp_str_ptr, "%d\t%d\t+\t%d\t", start_t, end_t, frame);
-        strcat(output_buffer, temp_str_ptr);
-        sprintf(temp_str_ptr, "I:");
-        strcat(output_buffer, temp_str_ptr);
-
-
-        for (i=0; i<insert_id; i++) {
-            sprintf(temp_str_ptr, "%d,", insert[i]);
-            strcat(output_buffer, temp_str_ptr);
-        }
-
-        sprintf(temp_str_ptr, "\tD:");
-        strcat(output_buffer, temp_str_ptr);
-
-        for (i=0; i<delete_id; i++) {
-            sprintf(temp_str_ptr, "%d,", c_delete[i]);
-            strcat(output_buffer, temp_str_ptr);
-        }
-
-        sprintf(temp_str_ptr, "\n");
-        strcat(output_buffer, temp_str_ptr);
-
-        sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
-
-        if(multiple)  strcat(aa_buffer, tab);
-
-        strcat(aa_buffer, temp_str_ptr);
-
-        sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
-        strcat(dna_buffer, temp_str_ptr);
-
-        get_protein(dna,protein,1);
-        sprintf(temp_str_ptr, "%s\n", protein);
-        strcat(aa_buffer, temp_str_ptr);
-        if (format == 0) {
-            sprintf(temp_str_ptr, "%s\n", dna);
-        } else if (format == 1) {
-            sprintf(temp_str_ptr, "%s\n", dna_f);
-        }
-        strcat(dna_buffer, temp_str_ptr);
-
-    } else if (codon_start == -1) {
-        //sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t%lf\t", start_t, end_t, frame, final_score);
+    else
         sprintf(temp_str_ptr, "%d\t%d\t-\t%d\t", start_t, end_t, frame);
+
+    strcat(output_buffer, temp_str_ptr);
+    sprintf(temp_str_ptr, "I:");
+    strcat(output_buffer, temp_str_ptr);
+
+    for (i = 0; i < insert_id; i++) {
+        sprintf(temp_str_ptr, "%d,", insert[i]);
         strcat(output_buffer, temp_str_ptr);
-        sprintf(temp_str_ptr, "I:");
+    }
+
+    sprintf(temp_str_ptr, "\tD:");
+    strcat(output_buffer, temp_str_ptr);
+
+    for (i = 0; i < delete_id; i++) {
+        sprintf(temp_str_ptr, "%d,", c_delete[i]);
         strcat(output_buffer, temp_str_ptr);
+    }
 
-        for (i = 0; i < insert_id; i++) {
-            sprintf(temp_str_ptr, "%d,", insert[i]);
-            strcat(output_buffer, temp_str_ptr);
-        }
+    sprintf(temp_str_ptr, "\n");
+    strcat(output_buffer, temp_str_ptr);
 
-        sprintf(temp_str_ptr, "\tD:");
-        strcat(output_buffer, temp_str_ptr);
-
-        for (i=0; i<delete_id; i++) {
-            sprintf(temp_str_ptr, "%d,", c_delete[i]);
-            strcat(output_buffer, temp_str_ptr);
-        }
-
-        sprintf(temp_str_ptr, "\n");
-        strcat(output_buffer, temp_str_ptr);
-
+    if (codon_start == 1)
+        sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
+    else
         sprintf(temp_str_ptr, "%s_%d_%d_-\n", sequence_head_short, start_t, end_t);
 
-        if(multiple)  strcat(aa_buffer, tab);
-        strcat(aa_buffer, temp_str_ptr);
+    if(multiple)  strcat(aa_buffer, "\t");
 
+    strcat(aa_buffer, temp_str_ptr);
 
-        sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
-        strcat(dna_buffer, temp_str_ptr);
+    sprintf(temp_str_ptr, "%s_%d_%d_+\n", sequence_head_short, start_t, end_t);
+    strcat(dna_buffer, temp_str_ptr);
 
-        get_protein(dna,protein,1);
-        sprintf(temp_str_ptr, "%s\n", protein);
-        strcat(aa_buffer, temp_str_ptr);
-        if (format == 0) {
-            sprintf(temp_str_ptr, "%s\n", dna);
-        } else if (format == 1) {
-            sprintf(temp_str_ptr, "%s\n", dna_f);
-        }
-        strcat(dna_buffer, temp_str_ptr);
-    }
+    get_protein(dna,protein,1);
+    sprintf(temp_str_ptr, "%s\n", protein);
+    strcat(aa_buffer, temp_str_ptr);
+    if (format == 0)
+        sprintf(temp_str_ptr, "%s\n", dna);
+    else if (format == 1)
+        sprintf(temp_str_ptr, "%s\n", dna_f);
+
+    strcat(dna_buffer, temp_str_ptr);
 }
