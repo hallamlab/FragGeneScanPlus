@@ -48,24 +48,8 @@ void setupProgram(int argc, char** argv) {
     fp = 0;
     // strncpy(train_dir, argv[0], strlen(argv[0])-4);
     // Set default training directory
-    strcpy(train_dir, "train");
-    strcat(train_dir, "/");
-    strcpy(mstate_file, train_dir);
-    strcat(mstate_file, "gene");
-    strcpy(rstate_file, train_dir);
-    strcat(rstate_file, "rgene");
-    strcpy(nstate_file, train_dir);
-    strcat(nstate_file, "noncoding");
-    strcpy(sstate_file, train_dir);
-    strcat(sstate_file, "start");
-    strcpy(pstate_file, train_dir);
-    strcat(pstate_file, "stop");
-    strcpy(s1state_file, train_dir);
-    strcat(s1state_file, "stop1");
-    strcpy(p1state_file, train_dir);
-    strcat(p1state_file, "start1");
-    strcpy(dstate_file, train_dir);
-    strcat(dstate_file, "pwm");
+    setTrainDirectory("train");
+
     /* read command line argument */
     //!! This argument reading should all be encapsulated in a single function, this will make reading the code much easier, right now we have to always move around it.
     if (argc <= 8) {
@@ -116,25 +100,7 @@ void setupProgram(int argc, char** argv) {
             strcat(dna_file, ".ffn");
             break;
         case 'r':
-            // Location of train directory
-            strcpy(train_dir, optarg);
-            strcat(train_dir, "/");
-            strcpy(mstate_file, train_dir);
-            strcat(mstate_file, "gene");
-            strcpy(rstate_file, train_dir);
-            strcat(rstate_file, "rgene");
-            strcpy(nstate_file, train_dir);
-            strcat(nstate_file, "noncoding");
-            strcpy(sstate_file, train_dir);
-            strcat(sstate_file, "start");
-            strcpy(pstate_file, train_dir);
-            strcat(pstate_file, "stop");
-            strcpy(s1state_file, train_dir);
-            strcat(s1state_file, "stop1");
-            strcpy(p1state_file, train_dir);
-            strcat(p1state_file, "start1");
-            strcpy(dstate_file, train_dir);
-            strcat(dstate_file, "pwm");
+            setTrainDirectory(optarg);
             break;
         case 't':
             strcpy(train_file, optarg);
@@ -165,25 +131,7 @@ void setupProgram(int argc, char** argv) {
     while ((c=getopt(argc, argv, "fs:m:o:w:r:t:p:dev")) != -1) {
         switch (c) {
         case 'r':
-            // Location of train directory
-            strcpy(train_dir, optarg);
-            strcat(train_dir, "/");
-            strcpy(mstate_file, train_dir);
-            strcat(mstate_file, "gene");
-            strcpy(rstate_file, train_dir);
-            strcat(rstate_file, "rgene");
-            strcpy(nstate_file, train_dir);
-            strcat(nstate_file, "noncoding");
-            strcpy(sstate_file, train_dir);
-            strcat(sstate_file, "start");
-            strcpy(pstate_file, train_dir);
-            strcat(pstate_file, "stop");
-            strcpy(s1state_file, train_dir);
-            strcat(s1state_file, "stop1");
-            strcpy(p1state_file, train_dir);
-            strcat(p1state_file, "start1");
-            strcpy(dstate_file, train_dir);
-            strcat(dstate_file, "pwm");
+            setTrainDirectory(optarg);
             break;
         }
     }
@@ -241,6 +189,27 @@ void setupProgram(int argc, char** argv) {
     remove(aa_file);
     if (output_meta) remove(out_file);
     if (output_dna) remove(dna_file);
+}
+
+void setTrainDirectory(char* train_path) {
+    strcpy(train_dir, train_path);
+    strcat(train_dir, "/");
+    strcpy(mstate_file, train_dir);
+    strcat(mstate_file, "gene");
+    strcpy(rstate_file, train_dir);
+    strcat(rstate_file, "rgene");
+    strcpy(nstate_file, train_dir);
+    strcat(nstate_file, "noncoding");
+    strcpy(sstate_file, train_dir);
+    strcat(sstate_file, "start");
+    strcpy(pstate_file, train_dir);
+    strcat(pstate_file, "stop");
+    strcpy(s1state_file, train_dir);
+    strcat(s1state_file, "stop1");
+    strcpy(p1state_file, train_dir);
+    strcat(p1state_file, "start1");
+    strcpy(dstate_file, train_dir);
+    strcat(dstate_file, "pwm");
 }
 
 void initializeSemaphores() {
