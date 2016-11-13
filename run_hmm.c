@@ -332,8 +332,7 @@ void destroySemaphores() {
 
 void initializeThreads() {
 
-    pthread_t *thread = malloc(sizeof(pthread_t*) * threadnum);
-    memset(thread, 0, sizeof(pthread_t*) * threadnum);
+    pthread_t *thread = calloc(threadnum, sizeof(pthread_t*));
     thread_datas = malloc(sizeof(thread_data) * threadnum);
 
     // allocate memory for each thread only once!
@@ -519,8 +518,7 @@ off_t read_file_into_buffer(FILE* fp, int fpos, thread_data* thread_data, unsign
 void init_thread_data(thread_data* td) {
     // Initialize thread data structure
 
-    td->hmm = malloc(sizeof(HMM));
-    memset(td->hmm, 0, sizeof(HMM));
+    td->hmm = calloc(1, sizeof(HMM));
     memcpy(td->hmm, &hmm, sizeof(HMM));
 
     td->wholegenome = wholegenome;
@@ -551,10 +549,8 @@ void init_thread_data(thread_data* td) {
 #endif
 
     // TODO : refactor to as many single large malloc calls as possible
-    td->output_num_sequences = malloc(sizeof(int) * 2);
-    memset(td->output_num_sequences, 0, sizeof(int)*2);
-    td->input_num_sequences = malloc(sizeof(int) * 2);
-    memset(td->input_num_sequences, 0, sizeof(int)*2);
+    td->output_num_sequences = calloc(2, sizeof(int));
+    td->input_num_sequences = calloc(2, sizeof(int));
 
     td->input_buffer = (char ***)malloc(sizeof(char**) * 2);
     td->input_head_buffer = (char ***)malloc(sizeof(char**) * 2);
@@ -562,18 +558,12 @@ void init_thread_data(thread_data* td) {
     td->aa_buffer = (char ***)malloc(sizeof(char**) * 2);
     td->dna_buffer = (char ***)malloc(sizeof(char**) * 2);
 
-    td->dna	= malloc(sizeof(char) * STRINGLEN);
-    memset(td->dna, 0, sizeof(char) * STRINGLEN);
-    td->dna1 = malloc(sizeof(char) * STRINGLEN);
-    memset(td->dna1, 0, sizeof(char) * STRINGLEN);
-    td->dna_f = malloc(sizeof(char) * STRINGLEN);
-    memset(td->dna_f, 0, sizeof(char) * STRINGLEN);
-    td->dna_f1 = malloc(sizeof(char) * STRINGLEN);
-    memset(td->dna_f1, 0, sizeof(char) * STRINGLEN);
-    td->protein = malloc(sizeof(char) * STRINGLEN);
-    memset(td->protein, 0, sizeof(char) * STRINGLEN);
-    td->temp_str = malloc(sizeof(char) * STRINGLEN);
-    memset(td->temp_str, 0, sizeof(char) * STRINGLEN);
+    td->dna	= calloc(STRINGLEN, sizeof(char));
+    td->dna1 = calloc(STRINGLEN, sizeof(char));
+    td->dna_f = calloc(STRINGLEN, sizeof(char));
+    td->dna_f1 = calloc(STRINGLEN, sizeof(char));
+    td->protein = calloc(STRINGLEN, sizeof(char));
+    td->temp_str = calloc(STRINGLEN, sizeof(char));
 
     td->insert = malloc(sizeof(int) * STRINGLEN);
     td->c_delete = malloc(sizeof(int) * STRINGLEN);
@@ -588,17 +578,11 @@ void init_thread_data(thread_data* td) {
 
         int j;
         for(j=0; j<MAX_SEQS_PER_BUFFER; j++) {
-            td->input_buffer[i][j] = malloc(STRINGLEN);
-            td->input_head_buffer[i][j] = malloc(STRINGLEN);
-            td->aa_buffer[i][j] = malloc(STRINGLEN);
-            td->dna_buffer[i][j] = malloc(STRINGLEN);
-            td->output_buffer[i][j] = malloc(STRINGLEN);
-
-            memset(td->output_buffer[i][j], 0, STRINGLEN);
-            memset(td->input_buffer[i][j], 0, STRINGLEN);
-            memset(td->dna_buffer[i][j], 0, STRINGLEN);
-            memset(td->aa_buffer[i][j], 0, STRINGLEN);
-            memset(td->input_head_buffer[i][j], 0, STRINGLEN );
+            td->input_buffer[i][j] = calloc(1, STRINGLEN);
+            td->input_head_buffer[i][j] = calloc(1, STRINGLEN);
+            td->aa_buffer[i][j] = calloc(1, STRINGLEN);
+            td->dna_buffer[i][j] = calloc(1, STRINGLEN);
+            td->output_buffer[i][j] = calloc(1, STRINGLEN);
         }
     }
 }
