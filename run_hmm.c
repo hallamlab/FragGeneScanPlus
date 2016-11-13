@@ -79,7 +79,7 @@ void setupProgram(int argc, char** argv) {
         case 's':
             strcpy(seq_file, optarg);
 
-            if(strcmp(seq_file, "stdin") >= 0) {
+            if(strcmp(seq_file, "stdin") == 0) {
                 break;
             } else if (access(seq_file, F_OK)==-1) {
                 fprintf(stderr, "ERROR: Sequence file [%s] does not exist\n", seq_file);
@@ -656,7 +656,7 @@ void writeAminoAcids(FILE* aa_outfile_fp, thread_data* td, unsigned int buffer) 
 FILE* openFilePointers() {
 
     FILE* aa_outfile_fp;
-    if(strcmp(out_file, "stdout") >= 0) {
+    if(strcmp(out_file, "stdout") == 0) {
         aa_outfile_fp = stdout;
     } else {
         aa_outfile_fp = fopen(aa_file, "a");
