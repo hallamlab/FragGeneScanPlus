@@ -219,6 +219,7 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
                    char* protein, int* insert, int* c_delete, int insert_id, int delete_id, int format, char* temp_str_ptr, unsigned int multiple);
 
 // helper functions to cleanup the main function
+void setTrainDirectory(char* train_path);
 void conductWork();
 void initializeThreads();
 void destroySemaphores();
