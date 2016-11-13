@@ -1137,7 +1137,7 @@ void print_outputs(int codon_start, int start_t, int end_t, int frame, char* out
 
     int i;
 
-    if (codon_start != 1 || codon_start != -1)
+    if (codon_start != 1 && codon_start != -1)
         return;
 
     if (codon_start == 1)
