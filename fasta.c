@@ -102,7 +102,7 @@ FASTAFILE * OpenFASTA(char *seqfile) {
     FASTAFILE *ffp;
     ffp = malloc(sizeof(FASTAFILE));
 
-    if(strcmp(seqfile, "stdin") >= 0) {
+    if(strcmp(seqfile, "stdin") == 0) {
         ffp->fp = stdin;
     } else {
         ffp->fp = fopen(seqfile, "r");              /* Assume seqfile exists & readable!   */
