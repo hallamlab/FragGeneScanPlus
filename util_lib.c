@@ -488,12 +488,7 @@ void print_usage() {
 
 }
 
-void stopMemset(char* ptr, int length) {
-    int i;
-    for(i=0; i<length; i++) {
-        if(ptr[i] == '\0') {
-            return;
-        }
-        ptr[i] = '\0';
-    }
+void clearString(char* str, int length) {
+    if (str != NULL && length > 0)
+        str[0] = '\0';
 }

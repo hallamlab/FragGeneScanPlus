@@ -610,9 +610,9 @@ void writeAminoAcids(FILE* aa_outfile_fp, thread_data* td, unsigned int buffer) 
         }
 
         //!! Why are we clearing dna and output buff?
-        stopMemset(td->output_buffer[buffer][j], STRINGLEN);
-        stopMemset(td->aa_buffer[buffer][j], STRINGLEN);
-        stopMemset(td->dna_buffer[buffer][j], STRINGLEN);
+        clearString(td->output_buffer[buffer][j], STRINGLEN);
+        clearString(td->aa_buffer[buffer][j], STRINGLEN);
+        clearString(td->dna_buffer[buffer][j], STRINGLEN);
     }
 }
 
