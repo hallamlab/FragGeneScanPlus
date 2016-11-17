@@ -792,13 +792,13 @@ void viterbi(HMM *hmm_ptr, char *O, char* output_buffer, char* aa_buffer,
                 (vpath[t]==M1_STATE || vpath[t]==M4_STATE ||
                  vpath[t]==M1_STATE_1 || vpath[t]==M4_STATE_1)) {
 
-            stopMemset(dna, STRINGLEN);
-            stopMemset(dna1, STRINGLEN);//
-            stopMemset(dna_f, STRINGLEN);//
-            stopMemset(dna_f1, STRINGLEN);//
-            stopMemset(protein, STRINGLEN);
-            stopMemset(insert, STRINGLEN);//
-            stopMemset(c_delete, STRINGLEN);//
+            clearString(dna, STRINGLEN);
+            clearString(dna1, STRINGLEN);
+            clearString(dna_f, STRINGLEN);
+            clearString(dna_f1, STRINGLEN);
+            clearString(protein, STRINGLEN);
+            clearString(insert, STRINGLEN);
+            clearString(c_delete, STRINGLEN);
 
             insert_id = 0;
             delete_id = 0;

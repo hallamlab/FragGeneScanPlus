@@ -39,6 +39,12 @@ QUEUE* deq(unsigned int which);
 
 void cutnpaste_q(QUEUE** dest, unsigned int which);
 
-void stopMemset(char* ptr, int length);
+/*
+ * Sets the string's first charachter to '\0', so string functions handle it
+ * like an empty string.
+ *
+ * NOTE: if you plan to use functions that use a given length, it's safer to use memset
+ */
+void clearString(char* str, int length);
 
 #endif
