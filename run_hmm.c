@@ -416,6 +416,8 @@ int main (int argc, char **argv) {
     destroySemaphores();
 
     printf("Run finished with %d threads.\n", threadnum);
+
+    return EXIT_SUCCESS;
 }
 
 int read_seq_into_buffer(FASTAFILE* ffp, thread_data* thread_data, unsigned int buf) {
